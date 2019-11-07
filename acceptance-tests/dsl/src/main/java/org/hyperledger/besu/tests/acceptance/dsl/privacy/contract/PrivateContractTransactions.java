@@ -53,6 +53,17 @@ public class PrivateContractTransactions {
         clazz, transactionSigningKey, chainId, privateFrom, privateFor);
   }
 
+  public <T extends Contract> DeployPrivateSmartContractTransaction<T> createSmartContract(
+      final Class<T> clazz,
+      final String transactionSigningKey,
+      final long chainId,
+      final String privateFrom,
+      final List<String> privateFor,
+      Object... args) {
+    return new DeployPrivateSmartContractTransaction<>(
+        clazz, transactionSigningKey, chainId, privateFrom, privateFor, args);
+  }
+
   public CallPrivateSmartContractFunction callSmartContract(
       final String contractAddress,
       final String encodedFunction,
