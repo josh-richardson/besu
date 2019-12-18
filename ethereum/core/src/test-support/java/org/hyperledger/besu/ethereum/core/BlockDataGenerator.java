@@ -19,6 +19,7 @@ import static java.util.stream.Collectors.toSet;
 
 import org.hyperledger.besu.crypto.SECP256K1;
 import org.hyperledger.besu.crypto.SecureRandomProvider;
+import org.hyperledger.besu.ethereum.mainnet.BodyValidation;
 import org.hyperledger.besu.ethereum.mainnet.MainnetBlockHeaderFunctions;
 import org.hyperledger.besu.ethereum.worldstate.WorldStateArchive;
 import org.hyperledger.besu.util.bytes.Bytes32;
@@ -219,9 +220,9 @@ public class BlockDataGenerator {
 
   public Block block(final BlockOptions options) {
     final long blockNumber = options.getBlockNumber(positiveLong());
-    final BlockHeader header = header(blockNumber, options);
     final BlockBody body =
         blockNumber == BlockHeader.GENESIS_BLOCK_NUMBER ? BlockBody.empty() : body(options);
+    final BlockHeader header = header(blockNumber, body, options);
     return new Block(header, body);
   }
 
@@ -240,30 +241,34 @@ public class BlockDataGenerator {
     return block(options);
   }
 
+  public BlockHeader header(final long blockNumber, final BlockBody blockBody) {
+    return header(blockNumber, blockBody, new BlockOptions());
+  }
+
   public BlockHeader header(final long blockNumber) {
-    return header(blockNumber, new BlockOptions());
+    return header(blockNumber, body());
   }
 
   public BlockHeader header() {
-    return header(positiveLong(), new BlockOptions());
+    return header(positiveLong());
   }
 
-  public BlockHeader header(final long number, final BlockOptions options) {
+  public BlockHeader header(final long number, final BlockBody body, final BlockOptions options) {
     final int gasLimit = random.nextInt() & Integer.MAX_VALUE;
     final int gasUsed = Math.max(0, gasLimit - 1);
     final long blockNonce = random.nextLong();
     return BlockHeaderBuilder.create()
         .parentHash(options.getParentHash(hash()))
-        .ommersHash(hash())
+        .ommersHash(BodyValidation.ommersHash(body.getOmmers()))
         .coinbase(address())
         .stateRoot(options.getStateRoot(hash()))
-        .transactionsRoot(hash())
-        .receiptsRoot(hash())
-        .logsBloom(logsBloom())
+        .transactionsRoot(BodyValidation.transactionsRoot(body.getTransactions()))
+        .receiptsRoot(options.getReceiptsRoot(hash()))
+        .logsBloom(options.getLogsBloom(logsBloom()))
         .difficulty(options.getDifficulty(uint256(4)))
         .number(number)
         .gasLimit(gasLimit)
-        .gasUsed(gasUsed)
+        .gasUsed(options.getGasUsed(gasUsed))
         .timestamp(Instant.now().truncatedTo(ChronoUnit.SECONDS).getEpochSecond())
         .extraData(options.getExtraData(bytes32()))
         .mixHash(hash())
@@ -278,15 +283,23 @@ public class BlockDataGenerator {
 
   public BlockBody body(final BlockOptions options) {
     final List<BlockHeader> ommers = new ArrayList<>();
-    final int ommerCount = random.nextInt(3);
-    for (int i = 0; i < ommerCount; i++) {
-      ommers.add(header());
+    if (options.hasOmmers()) {
+      final int ommerCount = random.nextInt(3);
+      for (int i = 0; i < ommerCount; i++) {
+        ommers.add(ommer());
+      }
     }
     final List<Transaction> defaultTxs = new ArrayList<>();
-    defaultTxs.add(transaction());
-    defaultTxs.add(transaction());
+    if (options.hasTransactions()) {
+      defaultTxs.add(transaction());
+      defaultTxs.add(transaction());
+    }
 
     return new BlockBody(options.getTransactions(defaultTxs), ommers);
+  }
+
+  private BlockHeader ommer() {
+    return header(positiveLong(), body(BlockOptions.create().hasOmmers(false)));
   }
 
   public Transaction transaction() {
@@ -486,6 +499,11 @@ public class BlockDataGenerator {
     private List<Transaction> transactions = new ArrayList<>();
     private Optional<BytesValue> extraData = Optional.empty();
     private Optional<BlockHeaderFunctions> blockHeaderFunctions = Optional.empty();
+    private Optional<Hash> receiptsRoot = Optional.empty();
+    private Optional<Long> gasUsed = Optional.empty();
+    private Optional<LogsBloomFilter> logsBloom = Optional.empty();
+    private boolean hasOmmers = true;
+    private boolean hasTransactions = true;
 
     public static BlockOptions create() {
       return new BlockOptions();
@@ -519,13 +537,33 @@ public class BlockDataGenerator {
       return blockHeaderFunctions.orElse(defaultValue);
     }
 
-    public BlockOptions addTransaction(final Transaction... tx) {
-      transactions.addAll(Arrays.asList(tx));
-      return this;
+    public Hash getReceiptsRoot(final Hash defaultValue) {
+      return receiptsRoot.orElse(defaultValue);
     }
 
-    public BlockOptions addTransaction(final Collection<Transaction> txs) {
-      return addTransaction(txs.toArray(new Transaction[] {}));
+    public long getGasUsed(final long defaultValue) {
+      return gasUsed.orElse(defaultValue);
+    }
+
+    public LogsBloomFilter getLogsBloom(final LogsBloomFilter defaultValue) {
+      return logsBloom.orElse(defaultValue);
+    }
+
+    public boolean hasTransactions() {
+      return hasTransactions;
+    }
+
+    public boolean hasOmmers() {
+      return hasOmmers;
+    }
+
+    public BlockOptions addTransaction(final Transaction... tx) {
+      return addTransaction(Arrays.asList(tx));
+    }
+
+    public BlockOptions addTransaction(final Collection<Transaction> tx) {
+      transactions.addAll(tx);
+      return this;
     }
 
     public BlockOptions setBlockNumber(final long blockNumber) {
@@ -555,6 +593,31 @@ public class BlockDataGenerator {
 
     public BlockOptions setBlockHeaderFunctions(final BlockHeaderFunctions blockHeaderFunctions) {
       this.blockHeaderFunctions = Optional.of(blockHeaderFunctions);
+      return this;
+    }
+
+    public BlockOptions setReceiptsRoot(final Hash receiptsRoot) {
+      this.receiptsRoot = Optional.of(receiptsRoot);
+      return this;
+    }
+
+    public BlockOptions setGasUsed(final long gasUsed) {
+      this.gasUsed = Optional.of(gasUsed);
+      return this;
+    }
+
+    public BlockOptions setLogsBloom(final LogsBloomFilter logsBloom) {
+      this.logsBloom = Optional.of(logsBloom);
+      return this;
+    }
+
+    public BlockOptions hasTransactions(final boolean hasTransactions) {
+      this.hasTransactions = hasTransactions;
+      return this;
+    }
+
+    public BlockOptions hasOmmers(final boolean hasOmmers) {
+      this.hasOmmers = hasOmmers;
       return this;
     }
   }

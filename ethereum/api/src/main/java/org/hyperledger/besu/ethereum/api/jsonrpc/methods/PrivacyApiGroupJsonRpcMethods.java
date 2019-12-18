@@ -82,6 +82,15 @@ public abstract class PrivacyApiGroupJsonRpcMethods extends ApiGroupJsonRpcMetho
         createPrivateMarkerTransactionFactory(
             privacyParameters, blockchainQueries, transactionPool.getPendingTransactions());
 
+    final PrivateStateRootResolver privateStateRootResolver =
+        new PrivateStateRootResolver(privacyParameters.getPrivateStateStorage());
+
+    final PrivateNonceProvider privateNonceProvider =
+        new ChainHeadPrivateNonceProvider(
+            blockchainQueries.getBlockchain(),
+            privateStateRootResolver,
+            privacyParameters.getPrivateWorldStateArchive());
+
     final PrivateTransactionHandler privateTransactionHandler =
         new PrivateTransactionHandler(
             privacyParameters,
@@ -89,11 +98,17 @@ public abstract class PrivacyApiGroupJsonRpcMethods extends ApiGroupJsonRpcMetho
             markerTransactionFactory,
             privateNonceProvider);
 
-    return create(privateTransactionHandler);
+    return create(
+        privateTransactionHandler,
+        new ChainHeadPrivateNonceProvider(
+            blockchainQueries.getBlockchain(),
+            privateStateRootResolver,
+            privacyParameters.getPrivateWorldStateArchive()));
   }
 
   protected abstract Map<String, JsonRpcMethod> create(
-      final PrivateTransactionHandler privateTransactionHandler);
+      final PrivateTransactionHandler privateTransactionHandler,
+      final PrivateNonceProvider privateNonceProvider);
 
   private PrivateMarkerTransactionFactory createPrivateMarkerTransactionFactory(
       final PrivacyParameters privacyParameters,

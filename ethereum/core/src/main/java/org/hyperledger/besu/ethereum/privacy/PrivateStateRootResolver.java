@@ -19,6 +19,7 @@ import org.hyperledger.besu.ethereum.core.Block;
 import org.hyperledger.besu.ethereum.core.BlockHeader;
 import org.hyperledger.besu.ethereum.core.Hash;
 import org.hyperledger.besu.ethereum.core.ProcessableBlockHeader;
+import org.hyperledger.besu.ethereum.privacy.storage.PrivacyGroupHeadBlockMap;
 import org.hyperledger.besu.ethereum.privacy.storage.PrivateBlockMetadata;
 import org.hyperledger.besu.ethereum.privacy.storage.PrivateStateStorage;
 import org.hyperledger.besu.ethereum.trie.MerklePatriciaTrie;
@@ -34,6 +35,39 @@ public class PrivateStateRootResolver {
 
   public PrivateStateRootResolver(final PrivateStateStorage privateStateStorage) {
     this.privateStateStorage = privateStateStorage;
+  }
+
+  public Hash resolveLastStateRoot(final BytesValue privacyGroupId, final Hash blockHash) {
+    final Optional<PrivateBlockMetadata> privateBlockMetadataOptional =
+        privateStateStorage.getPrivateBlockMetadata(blockHash, Bytes32.wrap(privacyGroupId));
+    if (privateBlockMetadataOptional.isPresent()) {
+      // Check if block already has meta data for the privacy group
+      return privateBlockMetadataOptional.get().getLatestStateRoot();
+    }
+    final PrivacyGroupHeadBlockMap privacyGroupHeadBlockMap =
+        privateStateStorage
+            .getPrivacyGroupHeadBlockMap(blockHash)
+            .orElse(PrivacyGroupHeadBlockMap.EMPTY);
+    return resolveLastStateRoot(privacyGroupId, privacyGroupHeadBlockMap);
+  }
+
+  private Hash resolveLastStateRoot(
+      final BytesValue privacyGroupId, final PrivacyGroupHeadBlockMap privacyGroupHeadBlockMap) {
+    final Hash lastRootHash;
+    if (privacyGroupHeadBlockMap.containsKey(Bytes32.wrap(privacyGroupId))) {
+      // Check this PG head block is being tracked
+      final Hash blockHashForLastBlockWithTx =
+          privacyGroupHeadBlockMap.get(Bytes32.wrap(privacyGroupId));
+      lastRootHash =
+          privateStateStorage
+              .getPrivateBlockMetadata(blockHashForLastBlockWithTx, Bytes32.wrap(privacyGroupId))
+              .get()
+              .getLatestStateRoot();
+    } else {
+      // First transaction for this PG
+      lastRootHash = EMPTY_ROOT_HASH;
+    }
+    return lastRootHash;
   }
 
   public Hash resolveLastStateRoot(

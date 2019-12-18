@@ -22,6 +22,7 @@ import org.hyperledger.besu.ethereum.core.BlockDataGenerator;
 import org.hyperledger.besu.ethereum.core.Hash;
 import org.hyperledger.besu.ethereum.core.InMemoryStorageProvider;
 import org.hyperledger.besu.ethereum.core.TransactionReceipt;
+import org.hyperledger.besu.ethereum.privacy.storage.PrivacyGroupHeadBlockMap;
 import org.hyperledger.besu.ethereum.privacy.storage.PrivateBlockMetadata;
 import org.hyperledger.besu.ethereum.privacy.storage.PrivateStateStorage;
 import org.hyperledger.besu.ethereum.privacy.storage.PrivateTransactionMetadata;
@@ -85,7 +86,7 @@ public class PrivateStateRootResolverTest {
   }
 
   @Test
-  public void mustResolveStateRootIfChainHeadIsNotCommited() {
+  public void mustResolveStateRootIfChainHeadIsNotCommitted() {
     final BlockDataGenerator.BlockOptions options =
         new BlockDataGenerator.BlockOptions()
             .setBlockNumber(BLOCKCHAIN.getChainHeadBlockNumber())
@@ -95,7 +96,7 @@ public class PrivateStateRootResolverTest {
         new PrivateStateRootResolver(privateStateStorage);
     assertThat(
             privateStateRootResolver.resolveLastStateRoot(
-                BLOCKCHAIN, block.getHeader(), privacyGroupId))
+                privacyGroupId, block.getHeader().getHash()))
         .isEqualTo(PrivateStateRootResolver.EMPTY_ROOT_HASH);
   }
 
@@ -105,7 +106,7 @@ public class PrivateStateRootResolverTest {
         new PrivateStateRootResolver(privateStateStorage);
     assertThat(
             privateStateRootResolver.resolveLastStateRoot(
-                BLOCKCHAIN, BLOCKCHAIN.getChainHeadHeader(), privacyGroupId))
+                privacyGroupId, BLOCKCHAIN.getChainHeadHeader().getHash()))
         .isEqualTo(PrivateStateRootResolver.EMPTY_ROOT_HASH);
   }
 
@@ -119,12 +120,17 @@ public class PrivateStateRootResolverTest {
             Collections.singletonList(
                 new PrivateTransactionMetadata(
                     BLOCK_GENERATOR.transaction().getHash(), pmt1StateHash))));
+    updater.putPrivacyGroupHeadBlockMap(
+        BLOCKCHAIN.getChainHeadHash(),
+        new PrivacyGroupHeadBlockMap(
+            Collections.singletonMap(
+                Bytes32.wrap(privacyGroupId), BLOCKCHAIN.getBlockByNumber(16).get().getHash())));
     updater.commit();
     final PrivateStateRootResolver privateStateRootResolver =
         new PrivateStateRootResolver(privateStateStorage);
     assertThat(
             privateStateRootResolver.resolveLastStateRoot(
-                BLOCKCHAIN, BLOCKCHAIN.getChainHeadHeader(), privacyGroupId))
+                privacyGroupId, BLOCKCHAIN.getChainHeadHash()))
         .isEqualTo(pmt1StateHash);
   }
 
@@ -135,22 +141,27 @@ public class PrivateStateRootResolverTest {
         BLOCKCHAIN.getBlockByNumber(16).get().getHash(),
         Bytes32.wrap(privacyGroupId),
         new PrivateBlockMetadata(
-            Arrays.asList(
+            Collections.singletonList(
                 new PrivateTransactionMetadata(
                     BLOCK_GENERATOR.transaction().getHash(), pmt1StateHash))));
     updater.putPrivateBlockMetadata(
         BLOCKCHAIN.getBlockByNumber(16).get().getHash(),
         Bytes32.wrap(failingPrivacyGroupId),
         new PrivateBlockMetadata(
-            Arrays.asList(
+            Collections.singletonList(
                 new PrivateTransactionMetadata(
                     BLOCK_GENERATOR.transaction().getHash(), pmt2StateHash))));
+    updater.putPrivacyGroupHeadBlockMap(
+        BLOCKCHAIN.getChainHeadHash(),
+        new PrivacyGroupHeadBlockMap(
+            Collections.singletonMap(
+                Bytes32.wrap(privacyGroupId), BLOCKCHAIN.getBlockByNumber(16).get().getHash())));
     updater.commit();
     final PrivateStateRootResolver privateStateRootResolver =
         new PrivateStateRootResolver(privateStateStorage);
     assertThat(
             privateStateRootResolver.resolveLastStateRoot(
-                BLOCKCHAIN, BLOCKCHAIN.getChainHeadHeader(), privacyGroupId))
+                privacyGroupId, BLOCKCHAIN.getChainHeadHash()))
         .isEqualTo(pmt1StateHash);
   }
 
@@ -166,12 +177,17 @@ public class PrivateStateRootResolverTest {
                     BLOCK_GENERATOR.transaction().getHash(), pmt1StateHash),
                 new PrivateTransactionMetadata(
                     BLOCK_GENERATOR.transaction().getHash(), pmt2StateHash))));
+    updater.putPrivacyGroupHeadBlockMap(
+        BLOCKCHAIN.getChainHeadHash(),
+        new PrivacyGroupHeadBlockMap(
+            Collections.singletonMap(
+                Bytes32.wrap(privacyGroupId), BLOCKCHAIN.getBlockByNumber(16).get().getHash())));
     updater.commit();
     final PrivateStateRootResolver privateStateRootResolver =
         new PrivateStateRootResolver(privateStateStorage);
     assertThat(
             privateStateRootResolver.resolveLastStateRoot(
-                BLOCKCHAIN, BLOCKCHAIN.getChainHeadHeader(), privacyGroupId))
+                privacyGroupId, BLOCKCHAIN.getChainHeadHash()))
         .isEqualTo(pmt2StateHash);
   }
 }

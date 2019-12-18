@@ -28,6 +28,7 @@ import org.hyperledger.besu.ethereum.core.LogSeries;
 import org.hyperledger.besu.ethereum.privacy.PrivateTransaction;
 import org.hyperledger.besu.ethereum.privacy.PrivateTransactionSimulator;
 import org.hyperledger.besu.ethereum.privacy.PrivateTransactionSimulatorResult;
+import org.hyperledger.besu.ethereum.rlp.BytesValueRLPInput;
 import org.hyperledger.besu.ethereum.rlp.RLP;
 import org.hyperledger.besu.plugin.services.storage.KeyValueStorage;
 import org.hyperledger.besu.plugin.services.storage.KeyValueStorageTransaction;
@@ -57,6 +58,8 @@ public class PrivateStateKeyValueStorage implements PrivateStateStorage {
   private static final BytesValue METADATA_KEY_SUFFIX = BytesValue.of("METADATA".getBytes(UTF_8));
   private static final BytesValue STATUS_KEY_SUFFIX = BytesValue.of("STATUS".getBytes(UTF_8));
   private static final BytesValue REVERT_KEY_SUFFIX = BytesValue.of("REVERT".getBytes(UTF_8));
+  private static final BytesValue PRIVACY_GROUP_HEAD_BLOCK_MAP_PREFIX =
+      BytesValue.of("MAP".getBytes(UTF_8));
 
   private final KeyValueStorage keyValueStorage;
 
@@ -77,7 +80,11 @@ public class PrivateStateKeyValueStorage implements PrivateStateStorage {
 
   @Override
   public Optional<List<Log>> getTransactionLogs(final Bytes32 transactionHash) {
-    return get(transactionHash, LOGS_KEY_SUFFIX).map(this::rlpDecodeLog);
+    final Optional<List<Log>> logs = get(transactionHash, LOGS_KEY_SUFFIX).map(this::rlpDecodeLog);
+    if (logs.isEmpty()) {
+      return get(transactionHash, EVENTS_KEY_SUFFIX).map(this::rlpDecodeLog);
+    }
+    return logs;
   }
 
   @Override
@@ -100,6 +107,12 @@ public class PrivateStateKeyValueStorage implements PrivateStateStorage {
       final Bytes32 blockHash, final Bytes32 privacyGroupId) {
     return get(BytesValues.concatenate(blockHash, privacyGroupId), METADATA_KEY_SUFFIX)
         .map(this::rlpDecodePrivateBlockMetadata);
+  }
+
+  @Override
+  public Optional<PrivacyGroupHeadBlockMap> getPrivacyGroupHeadBlockMap(final Bytes32 blockHash) {
+    return get(blockHash, PRIVACY_GROUP_HEAD_BLOCK_MAP_PREFIX)
+        .map(b -> PrivacyGroupHeadBlockMap.readFrom(new BytesValueRLPInput(b, false)));
   }
 
   @Override
@@ -291,6 +304,13 @@ public class PrivateStateKeyValueStorage implements PrivateStateStorage {
           BytesValues.concatenate(blockHash, privacyGroupId),
           METADATA_KEY_SUFFIX,
           RLP.encode(metadata::writeTo));
+      return this;
+    }
+
+    @Override
+    public PrivateStateStorage.Updater putPrivacyGroupHeadBlockMap(
+        final Bytes32 blockHash, final PrivacyGroupHeadBlockMap map) {
+      set(blockHash, PRIVACY_GROUP_HEAD_BLOCK_MAP_PREFIX, RLP.encode(map::writeTo));
       return this;
     }
 
