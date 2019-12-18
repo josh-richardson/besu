@@ -52,6 +52,6 @@ public class EeaJsonRpcMethods extends PrivacyApiGroupJsonRpcMethods {
         new PrivGetEeaTransactionCount(
             getPrivacyParameters(),
             new PrivateEeaNonceProvider(
-                getPrivacyParameters().getEnclave(), privateTransactionHandler)));
+                getPrivacyParameters().getEnclave(), getPrivateNonceProvider())));
   }
 }

@@ -26,6 +26,7 @@ import org.hyperledger.besu.ethereum.api.jsonrpc.internal.response.JsonRpcErrorR
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.response.JsonRpcSuccessResponse;
 import org.hyperledger.besu.ethereum.core.Address;
 import org.hyperledger.besu.ethereum.core.PrivacyParameters;
+import org.hyperledger.besu.ethereum.privacy.PrivateNonceProvider;
 import org.hyperledger.besu.ethereum.privacy.PrivateTransactionHandler;
 import org.hyperledger.besu.util.bytes.BytesValue;
 import org.hyperledger.besu.util.bytes.BytesValues;
@@ -54,8 +55,13 @@ public class PrivGetTransactionCountTest {
 
   @Test
   public void verifyTransactionCount() {
+    final PrivateNonceProvider privateNonceProvider = mock(PrivateNonceProvider.class);
+    when(privateNonceProvider.getNonce(senderAddress, BytesValues.fromBase64(privacyGroupId)))
+        .thenReturn(NONCE);
+
     final PrivGetTransactionCount privGetTransactionCount =
-        new PrivGetTransactionCount(privacyParameters, privateTransactionHandler);
+        new PrivGetTransactionCount(privateNonceProvider);
+    new PrivGetTransactionCount(privacyParameters, privateTransactionHandler);
 
     final Object[] params = new Object[] {senderAddress, privacyGroupId};
     final JsonRpcRequestContext request =

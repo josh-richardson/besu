@@ -22,6 +22,9 @@ import org.hyperledger.besu.ethereum.core.PrivacyParameters;
 import org.hyperledger.besu.ethereum.eth.transactions.PendingTransactions;
 import org.hyperledger.besu.ethereum.eth.transactions.TransactionPool;
 import org.hyperledger.besu.ethereum.mainnet.ProtocolSchedule;
+import org.hyperledger.besu.ethereum.privacy.ChainHeadPrivateNonceProvider;
+import org.hyperledger.besu.ethereum.privacy.PrivateNonceProvider;
+import org.hyperledger.besu.ethereum.privacy.PrivateStateRootResolver;
 import org.hyperledger.besu.ethereum.privacy.PrivateTransactionHandler;
 import org.hyperledger.besu.ethereum.privacy.markertransaction.FixedKeySigningPrivateMarkerTransactionFactory;
 import org.hyperledger.besu.ethereum.privacy.markertransaction.PrivateMarkerTransactionFactory;
@@ -35,6 +38,7 @@ public abstract class PrivacyApiGroupJsonRpcMethods extends ApiGroupJsonRpcMetho
   private final ProtocolSchedule<?> protocolSchedule;
   private final TransactionPool transactionPool;
   private final PrivacyParameters privacyParameters;
+  private final PrivateNonceProvider privateNonceProvider;
 
   public PrivacyApiGroupJsonRpcMethods(
       final BlockchainQueries blockchainQueries,
@@ -45,6 +49,11 @@ public abstract class PrivacyApiGroupJsonRpcMethods extends ApiGroupJsonRpcMetho
     this.protocolSchedule = protocolSchedule;
     this.transactionPool = transactionPool;
     this.privacyParameters = privacyParameters;
+    this.privateNonceProvider =
+        new ChainHeadPrivateNonceProvider(
+            getBlockchainQueries().getBlockchain(),
+            new PrivateStateRootResolver(getPrivacyParameters().getPrivateStateStorage()),
+            getPrivacyParameters().getPrivateWorldStateArchive());
   }
 
   public BlockchainQueries getBlockchainQueries() {
@@ -59,6 +68,10 @@ public abstract class PrivacyApiGroupJsonRpcMethods extends ApiGroupJsonRpcMetho
     return transactionPool;
   }
 
+  public PrivateNonceProvider getPrivateNonceProvider() {
+    return privateNonceProvider;
+  }
+
   public PrivacyParameters getPrivacyParameters() {
     return privacyParameters;
   }
@@ -71,7 +84,10 @@ public abstract class PrivacyApiGroupJsonRpcMethods extends ApiGroupJsonRpcMetho
 
     final PrivateTransactionHandler privateTransactionHandler =
         new PrivateTransactionHandler(
-            privacyParameters, protocolSchedule.getChainId(), markerTransactionFactory);
+            privacyParameters,
+            protocolSchedule.getChainId(),
+            markerTransactionFactory,
+            privateNonceProvider);
 
     return create(privateTransactionHandler);
   }

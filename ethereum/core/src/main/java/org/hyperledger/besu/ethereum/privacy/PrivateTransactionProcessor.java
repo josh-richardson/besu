@@ -251,6 +251,7 @@ public class PrivateTransactionProcessor {
               .miningBeneficiary(miningBeneficiary)
               .blockHashLookup(blockHashLookup)
               .maxStackSize(maxStackSize)
+              .transactionHash(transaction.getHash())
               .build();
 
     } else {
@@ -281,6 +282,7 @@ public class PrivateTransactionProcessor {
               .miningBeneficiary(miningBeneficiary)
               .blockHashLookup(blockHashLookup)
               .maxStackSize(maxStackSize)
+              .transactionHash(transaction.getHash())
               .build();
     }
 
@@ -292,9 +294,6 @@ public class PrivateTransactionProcessor {
 
     if (initialFrame.getState() == MessageFrame.State.COMPLETED_SUCCESS) {
       mutablePrivateWorldStateUpdater.commit();
-    }
-
-    if (initialFrame.getState() == MessageFrame.State.COMPLETED_SUCCESS) {
       return Result.successful(
           initialFrame.getLogs(), 0, initialFrame.getOutputData(), ValidationResult.valid());
     } else {
