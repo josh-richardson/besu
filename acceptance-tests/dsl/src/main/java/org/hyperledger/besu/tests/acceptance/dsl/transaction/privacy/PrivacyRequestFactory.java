@@ -39,6 +39,7 @@ import org.apache.tuweni.bytes.Bytes;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3jService;
 import org.web3j.protocol.besu.Besu;
+import org.web3j.protocol.besu.response.privacy.PrivFindPrivacyGroup;
 import org.web3j.protocol.besu.response.privacy.PrivateTransactionReceipt;
 import org.web3j.protocol.core.Request;
 import org.web3j.protocol.core.Response;

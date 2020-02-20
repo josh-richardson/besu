@@ -427,7 +427,9 @@ public class PrivacyReorgTest {
       final PrivateTransaction privateTransaction,
       final String enclavePublicKey) {
     final BytesValueRLPOutput rlpOutput = new BytesValueRLPOutput();
+    rlpOutput.startList();
     privateTransaction.writeTo(rlpOutput);
+    rlpOutput.endList();
     final String payload = rlpOutput.encoded().toBase64String();
 
     if (privateTransaction.getPrivacyGroupId().isPresent()) {
