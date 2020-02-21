@@ -319,7 +319,7 @@ public class ProtocolSpecBuilder<T> {
       onChainPrivacyPrecompiledContract.setPrivateTransactionProcessor(privateTransactionProcessor);
       blockProcessor =
           new PrivacyBlockProcessor(
-              (AbstractBlockProcessor) blockProcessor,
+              blockProcessor,
               protocolSchedule,
               privacyParameters.getEnclave(),
               privacyParameters.getPrivateStateStorage(),

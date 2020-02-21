@@ -83,7 +83,10 @@ public class PrivGetPrivateTransaction implements JsonRpcMethod {
           new BytesValueRLPInput(
               Bytes.fromBase64String(new String(receiveResponse.getPayload(), UTF_8)), false);
 
+      input.enterList();
       final PrivateTransaction privateTransaction = PrivateTransaction.readFrom(input);
+      input.leaveListLenient();
+
       if (privateTransaction.getPrivacyGroupId().isPresent()) {
         return new JsonRpcSuccessResponse(
             requestContext.getRequest().getId(),
