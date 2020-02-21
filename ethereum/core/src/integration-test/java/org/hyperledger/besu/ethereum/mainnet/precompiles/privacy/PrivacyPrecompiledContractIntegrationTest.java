@@ -14,7 +14,6 @@
  */
 package org.hyperledger.besu.ethereum.mainnet.precompiles.privacy;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
@@ -37,6 +36,7 @@ import org.hyperledger.besu.ethereum.privacy.PrivateTransaction;
 import org.hyperledger.besu.ethereum.privacy.PrivateTransactionProcessor;
 import org.hyperledger.besu.ethereum.privacy.storage.PrivacyGroupHeadBlockMap;
 import org.hyperledger.besu.ethereum.privacy.storage.PrivateStateStorage;
+import org.hyperledger.besu.ethereum.rlp.BytesValueRLPOutput;
 import org.hyperledger.besu.ethereum.vm.BlockHashLookup;
 import org.hyperledger.besu.ethereum.vm.MessageFrame;
 import org.hyperledger.besu.ethereum.vm.OperationTracer;
@@ -63,10 +63,7 @@ public class PrivacyPrecompiledContractIntegrationTest {
 
   @ClassRule public static final TemporaryFolder folder = new TemporaryFolder();
 
-  private static final byte[] VALID_PRIVATE_TRANSACTION_RLP_BASE64 =
-      Base64.getEncoder()
-          .encode(
-              Bytes.fromHexString(
+  private static final Bytes VALID_PRIVATE_TRANSACTION_RLP = Bytes.fromHexString(
                       "0xf90113800182520894095e7baea6a6c7c4c2dfeb977efac326af552d87"
                           + "a0ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
                           + "ffff801ba048b55bfa915ac795c431978d8a6a992b628d557da5ff759b307d"
@@ -76,8 +73,7 @@ public class PrivacyPrecompiledContractIntegrationTest {
                           + "784c4355486d425648586f5a7a7a42675062572f776a356178447057395838"
                           + "6c393153476f3dac4b6f32625671442b6e4e6c4e594c35454537793349644f"
                           + "6e766966746a69697a706a52742b4854754642733d8a726573747269637465"
-                          + "64")
-                  .toArray());
+                          + "64");
   private static final String DEFAULT_OUTPUT = "0x01";
 
   private static Enclave enclave;
@@ -170,7 +166,12 @@ public class PrivacyPrecompiledContractIntegrationTest {
   public void testSendAndReceive() {
     final List<String> publicKeys = testHarness.getPublicKeys();
 
-    final String s = new String(VALID_PRIVATE_TRANSACTION_RLP_BASE64, UTF_8);
+    final BytesValueRLPOutput bytesValueRLPOutput = new BytesValueRLPOutput();
+    bytesValueRLPOutput.startList();
+    bytesValueRLPOutput.writeRLP(VALID_PRIVATE_TRANSACTION_RLP);
+    bytesValueRLPOutput.endList();
+
+    final String s = bytesValueRLPOutput.encoded().toBase64String();
     final SendResponse sr =
         enclave.send(s, publicKeys.get(0), Lists.newArrayList(publicKeys.get(0)));
 
@@ -191,7 +192,7 @@ public class PrivacyPrecompiledContractIntegrationTest {
     final List<String> publicKeys = testHarness.getPublicKeys();
     publicKeys.add("noPrivateKey");
 
-    final String s = new String(VALID_PRIVATE_TRANSACTION_RLP_BASE64, UTF_8);
+    final String s = VALID_PRIVATE_TRANSACTION_RLP.toBase64String();
 
     final Throwable thrown = catchThrowable(() -> enclave.send(s, publicKeys.get(0), publicKeys));
 
@@ -203,7 +204,7 @@ public class PrivacyPrecompiledContractIntegrationTest {
     final List<String> publicKeys = testHarness.getPublicKeys();
     publicKeys.add("noPrivateKenoPrivateKenoPrivateKenoPrivateK");
 
-    final String s = new String(VALID_PRIVATE_TRANSACTION_RLP_BASE64, UTF_8);
+    final String s = VALID_PRIVATE_TRANSACTION_RLP.toBase64String();
 
     final Throwable thrown = catchThrowable(() -> enclave.send(s, publicKeys.get(0), publicKeys));
 
