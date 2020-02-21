@@ -72,7 +72,8 @@ public class PrivGetTransactionReceiptTest {
   @Rule public final TemporaryFolder temp = new TemporaryFolder();
 
   private static final String ENCLAVE_PUBLIC_KEY = "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=";
-  private static final Bytes ENCLAVE_KEY = Bytes.wrap("EnclaveKey".getBytes(UTF_8));
+  private static final Bytes ENCLAVE_KEY =
+      Bytes.wrap("Ko2bVqD+nNlNYL5EE7y3IdOnviftjiizpjRt+HTuFBs=".getBytes(UTF_8));
   private static final Address SENDER =
       Address.fromHexString("0xfe3b557e8fb62b89f4916b721be55ceb828dbd73");
 
@@ -117,7 +118,7 @@ public class PrivGetTransactionReceiptTest {
           .gasLimit(3000000)
           .to(Address.fromHexString("0x627306090abab3a6e1400e9345bc60c78a8bef57"))
           .value(Wei.ZERO)
-          .payload(Bytes.wrap("Ko2bVqD+nNlNYL5EE7y3IdOnviftjiizpjRt+HTuFBs=".getBytes(UTF_8)))
+          .payload(ENCLAVE_KEY)
           .sender(SENDER)
           .chainId(BigInteger.valueOf(2018))
           .signAndBuild(KEY_PAIR);
