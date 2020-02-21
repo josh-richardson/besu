@@ -158,7 +158,9 @@ public class PrivGetPrivateTransactionIntegrationTest {
     when(returnedTransaction.getTransaction()).thenReturn(justTransaction);
 
     final BytesValueRLPOutput bvrlp = new BytesValueRLPOutput();
+    bvrlp.startList();
     privateTransaction.writeTo(bvrlp);
+    bvrlp.endList();
 
     final String payload = Base64.getEncoder().encodeToString(bvrlp.encoded().toArrayUnsafe());
     final ArrayList<String> to = Lists.newArrayList("A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=");
