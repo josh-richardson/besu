@@ -25,6 +25,8 @@ dependencies {
   testImplementation project(':plugin-api')
   testImplementation project(':testutil')
   testImplementation project(':util')
+  testImplementation project(':privacy-contracts')
+
 
   testImplementation 'junit:junit'
   testImplementation 'net.consensys:orion'

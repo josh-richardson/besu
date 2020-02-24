@@ -32,6 +32,4 @@ dependencies {
   implementation 'org.web3j:core'
   implementation 'org.web3j:eea'
   implementation 'org.web3j:utils'
-  implementation 'org.web3j:web3j-evm'
-  implementation 'org.web3j:web3j-unit'
 }
