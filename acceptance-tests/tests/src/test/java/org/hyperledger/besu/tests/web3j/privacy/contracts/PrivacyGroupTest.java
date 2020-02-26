@@ -14,7 +14,7 @@
  */
 package org.hyperledger.besu.tests.web3j.privacy.contracts;
 
-import org.hyperledger.besu.privacy.contracts.generated.PrivacyGroup;
+import org.hyperledger.besu.privacy.contracts.PrivacyGroup;
 import org.hyperledger.besu.tests.acceptance.dsl.privacy.PrivacyAcceptanceTestBase;
 import org.hyperledger.besu.tests.acceptance.dsl.privacy.PrivacyNode;
 

@@ -16,8 +16,8 @@ package org.hyperledger.besu.tests.web3j.privacy.contracts;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.hyperledger.besu.privacy.contracts.generated.PrivacyGroup;
-import org.hyperledger.besu.privacy.contracts.generated.PrivacyProxy;
+import org.hyperledger.besu.privacy.contracts.PrivacyGroup;
+import org.hyperledger.besu.privacy.contracts.PrivacyProxy;
 
 import java.util.Collections;
 import java.util.List;
