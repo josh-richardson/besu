@@ -27,7 +27,6 @@ dependencies {
   testImplementation project(':util')
   testImplementation project(':privacy-contracts')
 
-
   testImplementation 'junit:junit'
   testImplementation 'net.consensys:orion'
   testImplementation 'org.apache.tuweni:tuweni-crypto'

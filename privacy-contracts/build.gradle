@@ -16,8 +16,6 @@ apply plugin: 'java-library'
 
 jar { enabled = false }
 dependencies {
-  implementation project(':plugin-api')
-  implementation project(':util')
 
   implementation 'com.fasterxml.jackson.core:jackson-databind'
   implementation 'com.google.guava:guava'
