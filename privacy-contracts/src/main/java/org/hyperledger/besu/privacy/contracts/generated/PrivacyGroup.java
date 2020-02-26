@@ -12,7 +12,7 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package org.hyperledger.besu.privacy.contracts;
+package org.hyperledger.besu.privacy.contracts.generated;
 
 import java.math.BigInteger;
 import java.util.ArrayList;

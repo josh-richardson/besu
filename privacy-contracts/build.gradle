@@ -12,11 +12,9 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-apply plugin: 'java-library'
 
-jar { enabled = false }
+jar { enabled = true }
 dependencies {
-
   implementation 'net.consensys:orion'
   implementation 'org.apache.tuweni:tuweni-bytes'
   implementation 'org.apache.tuweni:tuweni-io'

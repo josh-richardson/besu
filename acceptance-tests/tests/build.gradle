@@ -20,12 +20,13 @@ dependencies {
   testImplementation project(':ethereum:api')
   testImplementation project(':ethereum:core')
   testImplementation project(':ethereum:rlp')
+  testImplementation project(':privacy-contracts')
   testImplementation project(path: ':ethereum:core', configuration: 'testSupportArtifacts')
   testImplementation project(':ethereum:permissioning')
   testImplementation project(':plugin-api')
   testImplementation project(':testutil')
   testImplementation project(':util')
-  implementation project(':privacy-contracts')
+
 
   testImplementation 'junit:junit'
   testImplementation 'net.consensys:orion'
