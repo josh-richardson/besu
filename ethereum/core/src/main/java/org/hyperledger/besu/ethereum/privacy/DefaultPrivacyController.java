@@ -432,28 +432,6 @@ public class DefaultPrivacyController implements PrivacyController {
   private SendResponse sendRequest(
       final PrivateTransaction privateTransaction, final String enclavePublicKey) {
     final BytesValueRLPOutput rlpOutput = new BytesValueRLPOutput();
-    rlpOutput.startList();
-    privateTransaction.writeTo(rlpOutput);
-
-    privateTransaction
-        .getPrivacyGroupId()
-        .ifPresent(
-            privacyGroupId -> {
-              final Optional<PrivateTransactionProcessor.Result> process =
-                  privateTransactionSimulator.process(
-                      privateTransaction.getPrivacyGroupId().get().toBase64String(),
-                      buildCallParams(
-                          Bytes.fromBase64String(enclavePublicKey), GET_VERSION_METHOD_SIGNATURE));
-              process.ifPresent(
-                  result -> {
-                    if (!result.getOutput().toHexString().equals("0x")) {
-                      rlpOutput.writeBytes(result.getOutput());
-                    }
-                  });
-            });
-
-    rlpOutput.endList();
-    final String payload = rlpOutput.encoded().toBase64String();
 
     final List<String> privateFor = resolvePrivateFor(privateTransaction, enclavePublicKey);
 
@@ -465,10 +443,24 @@ public class DefaultPrivacyController implements PrivacyController {
                 privateTransaction.getPrivacyGroupId().get().toBase64String());
       } catch (final EnclaveClientException e) {
         // onchain privacy group
+        final Optional<PrivateTransactionProcessor.Result> result =
+            privateTransactionSimulator.process(
+                privateTransaction.getPrivacyGroupId().get().toBase64String(),
+                buildCallParams(
+                    Bytes.fromBase64String(enclavePublicKey), GET_VERSION_METHOD_SIGNATURE));
+        new VersionedPrivateTransaction(privateTransaction, result).writeTo(rlpOutput);
+        if (privateFor.isEmpty()) {
+          privateFor.add(privateTransaction.getPrivateFrom().toBase64String());
+        }
+        return enclave.send(
+            rlpOutput.encoded().toBase64String(),
+            privateTransaction.getPrivateFrom().toBase64String(),
+            privateFor);
       }
       if (privacyGroup != null) {
+        privateTransaction.writeTo(rlpOutput);
         return enclave.send(
-            payload,
+            rlpOutput.encoded().toBase64String(),
             privateTransaction.getPrivateFrom().toBase64String(),
             privateTransaction.getPrivacyGroupId().get().toBase64String());
       }
@@ -476,6 +468,9 @@ public class DefaultPrivacyController implements PrivacyController {
     if (privateFor.isEmpty()) {
       privateFor.add(privateTransaction.getPrivateFrom().toBase64String());
     }
+
+    privateTransaction.writeTo(rlpOutput);
+    final String payload = rlpOutput.encoded().toBase64String();
 
     return enclave.send(payload, privateTransaction.getPrivateFrom().toBase64String(), privateFor);
   }

@@ -20,7 +20,6 @@ import org.hyperledger.besu.enclave.types.ReceiveResponse;
 import org.hyperledger.besu.ethereum.chain.Blockchain;
 import org.hyperledger.besu.ethereum.core.Address;
 import org.hyperledger.besu.ethereum.core.BlockHeader;
-import org.hyperledger.besu.ethereum.core.Hash;
 import org.hyperledger.besu.ethereum.core.MutableWorldState;
 import org.hyperledger.besu.ethereum.core.Transaction;
 import org.hyperledger.besu.ethereum.privacy.PrivateStateRehydration;
@@ -108,7 +107,6 @@ public class PrivacyBlockProcessor implements BlockProcessor {
                   privateStateStorage.updater().putAddDataKey(privacyGroupId, addKey).commit();
                 }
               } catch (final EnclaveClientException e) {
-                System.out.println();
                 // we were not being added
               }
             });
@@ -122,26 +120,6 @@ public class PrivacyBlockProcessor implements BlockProcessor {
         .putPrivacyGroupHeadBlockMap(blockHeader.getHash(), privacyGroupHeadBlockMap)
         .commit();
     return blockProcessor.processBlock(blockchain, worldState, blockHeader, transactions, ommers);
-  }
-
-  protected void rehydratePrivacyGroupHeadBlockMap(
-      final Bytes32 privacyGroupId,
-      final Hash hashOfLastBlockWithPmt,
-      final Blockchain currentBlockchain,
-      final long from,
-      final long to) {
-    for (long j = from + 1; j < to; j++) {
-      final BlockHeader theBlockHeader = currentBlockchain.getBlockHeader(j).orElseThrow();
-      final PrivacyGroupHeadBlockMap thePrivacyGroupHeadBlockMap =
-          privateStateStorage
-              .getPrivacyGroupHeadBlockMap(theBlockHeader.getHash())
-              .orElse(PrivacyGroupHeadBlockMap.EMPTY);
-      final PrivateStateStorage.Updater privateStateUpdater = privateStateStorage.updater();
-      thePrivacyGroupHeadBlockMap.put(privacyGroupId, hashOfLastBlockWithPmt);
-      privateStateUpdater.putPrivacyGroupHeadBlockMap(
-          theBlockHeader.getHash(), new PrivacyGroupHeadBlockMap(thePrivacyGroupHeadBlockMap));
-      privateStateUpdater.commit();
-    }
   }
 
   private List<PrivateTransactionWithMetadata> deserializeAddToGroupPayload(

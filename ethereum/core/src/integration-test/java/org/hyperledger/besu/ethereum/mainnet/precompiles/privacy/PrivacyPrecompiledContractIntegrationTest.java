@@ -167,9 +167,7 @@ public class PrivacyPrecompiledContractIntegrationTest {
     final List<String> publicKeys = testHarness.getPublicKeys();
 
     final BytesValueRLPOutput bytesValueRLPOutput = new BytesValueRLPOutput();
-    bytesValueRLPOutput.startList();
     bytesValueRLPOutput.writeRLP(VALID_PRIVATE_TRANSACTION_RLP);
-    bytesValueRLPOutput.endList();
 
     final String s = bytesValueRLPOutput.encoded().toBase64String();
     final SendResponse sr =

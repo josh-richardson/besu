@@ -96,6 +96,7 @@ public class PrivateGroupRehydrationBlockProcessor {
     final List<Transaction> transactions = block.getBody().getTransactions();
     final BlockHeader blockHeader = block.getHeader();
     for (final Transaction transaction : transactions) {
+
       final long remainingGasBudget = blockHeader.getGasLimit() - gasUsed;
       if (Long.compareUnsigned(transaction.getGasLimit(), remainingGasBudget) > 0) {
         LOG.warn(
@@ -110,30 +111,10 @@ public class PrivateGroupRehydrationBlockProcessor {
       final Address miningBeneficiary =
           miningBeneficiaryCalculator.calculateBeneficiary(blockHeader);
 
-      final TransactionProcessor.Result result =
-          transactionProcessor.processTransaction(
-              blockchain,
-              worldStateUpdater,
-              blockHeader,
-              transaction,
-              miningBeneficiary,
-              blockHashLookup,
-              true,
-              TransactionValidationParams.processingBlock());
-      if (result.isInvalid()) {
-        return AbstractBlockProcessor.Result.failed();
-      }
-
-      worldStateUpdater.commit();
-      gasUsed = transaction.getGasLimit() - result.getGasRemaining() + gasUsed;
-      final TransactionReceipt transactionReceipt =
-          transactionReceiptFactory.create(result, worldState, gasUsed);
-      receipts.add(transactionReceipt);
-
       final PrivateStateRootResolver privateStateRootResolver =
           new PrivateStateRootResolver(privateStateStorage);
-      final PrivateTransaction privateTransaction = forExecution.get(transaction.getHash());
       if (forExecution.containsKey(transaction.getHash())) {
+        final PrivateTransaction privateTransaction = forExecution.get(transaction.getHash());
         final Hash lastRootHash =
             privateStateRootResolver.resolveLastStateRoot(
                 Bytes32.wrap(privateTransaction.getPrivacyGroupId().get()),
@@ -171,6 +152,26 @@ public class PrivateGroupRehydrationBlockProcessor {
             privateResult);
         LOG.info("Post-rehydrate root hash: {}", disposablePrivateState.rootHash());
       }
+
+      final TransactionProcessor.Result result =
+          transactionProcessor.processTransaction(
+              blockchain,
+              worldStateUpdater,
+              blockHeader,
+              transaction,
+              miningBeneficiary,
+              blockHashLookup,
+              true,
+              TransactionValidationParams.processingBlock());
+      if (result.isInvalid()) {
+        return AbstractBlockProcessor.Result.failed();
+      }
+
+      worldStateUpdater.commit();
+      gasUsed = transaction.getGasLimit() - result.getGasRemaining() + gasUsed;
+      final TransactionReceipt transactionReceipt =
+          transactionReceiptFactory.create(result, worldState, gasUsed);
+      receipts.add(transactionReceipt);
     }
 
     if (!rewardCoinbase(worldState, blockHeader, ommers, skipZeroBlockRewards)) {

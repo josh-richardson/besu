@@ -133,9 +133,7 @@ public class PrivacyPrecompiledContractTest {
     final String privacyGroupId = "8lDVI66RZHIrBsolz6Kn88Rd+WsJ4hUjb4hsh29xW/o=";
 
     BytesValueRLPOutput bytesValueRLPOutput = new BytesValueRLPOutput();
-    bytesValueRLPOutput.startList();
     PrivateTransactionDataFixture.privateTransaction(privacyGroupId).writeTo(bytesValueRLPOutput);
-    bytesValueRLPOutput.endList();
 
     final ReceiveResponse response =
         new ReceiveResponse(

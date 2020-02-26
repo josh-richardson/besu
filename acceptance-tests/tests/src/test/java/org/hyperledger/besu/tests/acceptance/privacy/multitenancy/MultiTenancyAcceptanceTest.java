@@ -279,9 +279,7 @@ public class MultiTenancyAcceptanceTest extends AcceptanceTestBase {
   private BytesValueRLPOutput getRLPOutputForReceiveResponse(
       final PrivateTransaction privateTransaction) {
     final BytesValueRLPOutput bvrlpo = new BytesValueRLPOutput();
-    bvrlpo.startList();
     privateTransaction.writeTo(bvrlpo);
-    bvrlpo.endList();
     return bvrlpo;
   }
 
