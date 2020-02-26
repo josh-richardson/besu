@@ -41,6 +41,15 @@ public class PrivacyGroupTest extends AcceptanceTestBase {
       Base64String.wrap("Jo2bVqD+nNlNYL5EE7y3IdOnviftjiizpjRt+HTuFBs=");
   private PrivacyGroup privacyGroup;
 
+  private static final String RAW_FIRST_PARTICIPANT =
+      "0x0b0235be035695b4cc4b0941e60551d7a19cf30603db5bfc23e5ac43a56f57f25f75486a";
+  private static final String RAW_ADD_PARTICIPANT =
+      "0xf744b089035695b4cc4b0941e60551d7a19cf30603db5bfc23e5ac43a56f57f25f75486a000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000012a8d9b56a0fe9cd94d60be4413bcb721d3a7be27ed8e28b3a6346df874ee141b";
+  private static final String RAW_LOCK = "0xf83d08ba";
+  private static final String RAW_UNLOCK = "0xa69df4b5";
+  private static final String RAW_CAN_EXECUTE = "0x78b90337";
+  private static final String RAW_GET_VERSION = "0x0d8e6e2c";
+
   private BesuNode minerNode;
 
   @Before
@@ -56,20 +65,19 @@ public class PrivacyGroupTest extends AcceptanceTestBase {
     assertThat(privacyGroup.isValid()).isEqualTo(true);
     contractVerifier.validTransactionReceipt(contractAddress).verify(privacyGroup);
     // 0x0b0235be
-    assertThat("0x0b0235be035695b4cc4b0941e60551d7a19cf30603db5bfc23e5ac43a56f57f25f75486a")
+    assertThat(RAW_FIRST_PARTICIPANT)
         .isEqualTo(privacyGroup.getParticipants(firstParticipant.raw()).encodeFunctionCall());
     // 0xf744b089
-    assertThat(
-            "0xf744b089035695b4cc4b0941e60551d7a19cf30603db5bfc23e5ac43a56f57f25f75486a000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000012a8d9b56a0fe9cd94d60be4413bcb721d3a7be27ed8e28b3a6346df874ee141b")
+    assertThat(RAW_ADD_PARTICIPANT)
         .isEqualTo(
             privacyGroup
                 .addParticipants(
                     firstParticipant.raw(), Collections.singletonList(secondParticipant.raw()))
                 .encodeFunctionCall());
-    assertThat("0xf83d08ba").isEqualTo(privacyGroup.lock().encodeFunctionCall());
-    assertThat("0xa69df4b5").isEqualTo(privacyGroup.unlock().encodeFunctionCall());
-    assertThat("0x78b90337").isEqualTo(privacyGroup.canExecute().encodeFunctionCall());
-    assertThat("0x0d8e6e2c").isEqualTo(privacyGroup.getVersion().encodeFunctionCall());
+    assertThat(RAW_LOCK).isEqualTo(privacyGroup.lock().encodeFunctionCall());
+    assertThat(RAW_UNLOCK).isEqualTo(privacyGroup.unlock().encodeFunctionCall());
+    assertThat(RAW_CAN_EXECUTE).isEqualTo(privacyGroup.canExecute().encodeFunctionCall());
+    assertThat(RAW_GET_VERSION).isEqualTo(privacyGroup.getVersion().encodeFunctionCall());
   }
 
   @Test

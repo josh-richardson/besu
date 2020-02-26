@@ -48,12 +48,12 @@ public class DeploySmartContractTransaction<T extends Contract> implements Trans
   public T execute(final NodeRequests node) {
     try {
       if (args != null && args.length != 0) {
-        ArrayList<Object> parameterObjects = new ArrayList<>();
+        final ArrayList<Object> parameterObjects = new ArrayList<>();
         parameterObjects.addAll(
             Arrays.asList(node.eth(), BENEFACTOR_ONE, DEFAULT_GAS_PRICE, DEFAULT_GAS_LIMIT));
         parameterObjects.addAll(Arrays.asList(args));
 
-        ArrayList<Class> parameterTypes =
+        final ArrayList<Class> parameterTypes =
             parameterObjects.stream()
                 .map(Object::getClass)
                 .collect(Collectors.toCollection(ArrayList::new));

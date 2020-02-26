@@ -40,6 +40,11 @@ public class PrivacyProxyTest extends AcceptanceTestBase {
       Base64String.wrap("Jo2bVqD+nNlNYL5EE7y3IdOnviftjiizpjRt+HTuFBs=");
   private PrivacyProxy privacyProxy;
 
+  private static final String RAW_FIRST_PARTICIPANT =
+      "0x0b0235bef772b2ee55f016431cefe724a05814324bb96e9afdb73e338665a693d4653678";
+  private static final String RAW_ADD_PARTICIPANT =
+      "0xf744b089f772b2ee55f016431cefe724a05814324bb96e9afdb73e338665a693d465367800000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000000";
+
   private BesuNode minerNode;
 
   @Before
@@ -61,11 +66,10 @@ public class PrivacyProxyTest extends AcceptanceTestBase {
         .validTransactionReceipt(privacyProxy.getContractAddress())
         .verify(privacyProxy);
     // 0x0b0235be
-    assertThat("0x0b0235bef772b2ee55f016431cefe724a05814324bb96e9afdb73e338665a693d4653678")
+    assertThat(RAW_FIRST_PARTICIPANT)
         .isEqualTo(privacyProxy.getParticipants(firstParticipant.raw()).encodeFunctionCall());
     // 0xf744b089
-    assertThat(
-            "0xf744b089f772b2ee55f016431cefe724a05814324bb96e9afdb73e338665a693d465367800000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000000")
+    assertThat(RAW_ADD_PARTICIPANT)
         .isEqualTo(
             privacyProxy
                 .addParticipants(firstParticipant.raw(), Collections.emptyList())
