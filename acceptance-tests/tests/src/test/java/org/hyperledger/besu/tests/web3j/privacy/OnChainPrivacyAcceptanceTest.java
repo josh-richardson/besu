@@ -17,18 +17,20 @@ package org.hyperledger.besu.tests.web3j.privacy;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.hyperledger.besu.ethereum.core.Address;
+import org.hyperledger.besu.tests.acceptance.dsl.condition.eth.EthConditions;
 import org.hyperledger.besu.tests.acceptance.dsl.privacy.PrivacyAcceptanceTestBase;
 import org.hyperledger.besu.tests.acceptance.dsl.privacy.PrivacyNode;
+import org.hyperledger.besu.tests.acceptance.dsl.transaction.miner.MinerTransactions;
 import org.hyperledger.besu.tests.acceptance.dsl.transaction.privacy.PrivacyRequestFactory.PrivxCreatePrivacyGroup;
 import org.hyperledger.besu.tests.web3j.generated.EventEmitter;
 
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Optional;
 
 import org.apache.tuweni.bytes.Bytes;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.web3j.protocol.besu.response.privacy.PrivacyGroup;
 import org.web3j.protocol.besu.response.privacy.PrivateTransactionReceipt;
@@ -42,6 +44,9 @@ public class OnChainPrivacyAcceptanceTest extends PrivacyAcceptanceTestBase {
   private PrivacyNode alice;
   private PrivacyNode bob;
   private PrivacyNode charlie;
+
+  private MinerTransactions minerTransactions = new MinerTransactions();
+  private EthConditions ethConditions = new EthConditions(ethTransactions);
 
   @Before
   public void setUp() throws Exception {
@@ -210,9 +215,6 @@ public class OnChainPrivacyAcceptanceTest extends PrivacyAcceptanceTestBase {
             expectedGroupAfterCharlieIsAdded));
   }
 
-  // Depends on transaction ordering enforced in the test,
-  // which sometimes fails because transactions are not mined in the same order every time
-  @Ignore
   @Test
   public void bobCanAddCharlieAfterBeingAddedByAlice() {
     final PrivxCreatePrivacyGroup privxCreatePrivacyGroup =
@@ -264,6 +266,12 @@ public class OnChainPrivacyAcceptanceTest extends PrivacyAcceptanceTestBase {
 
     bob.execute(privacyTransactions.privxLockContract(privacyGroupId, bob));
 
+    alice.execute(minerTransactions.minerStop());
+
+    alice.getBesu().verify(ethConditions.miningStatus(false));
+
+    final BigInteger pendingTransactionFilterId = alice.execute(ethTransactions.newPendingTransactionsFilter());
+
     final String callHash =
         alice.execute(
             privateContractTransactions.callOnChainPermissioningSmartContract(
@@ -276,6 +284,13 @@ public class OnChainPrivacyAcceptanceTest extends PrivacyAcceptanceTestBase {
 
     final String bobAddHash =
         bob.execute(privacyTransactions.addToPrivacyGroup(privacyGroupId, bob, charlie));
+
+
+    alice.getBesu().verify(ethConditions.expectNewPendingTransactions(pendingTransactionFilterId, Arrays.asList(callHash, bobAddHash)));
+
+    alice.execute(minerTransactions.minerStart());
+
+    alice.getBesu().verify(ethConditions.miningStatus(true));
 
     final PrivacyGroup expectedGroupAfterCharlieIsAdded =
         new PrivacyGroup(
