@@ -250,7 +250,8 @@ public class OnChainPrivacyPrecompiledContract extends AbstractPrecompiledContra
           privacyGroupHeadBlockMap,
           disposablePrivateState,
           privateWorldStateUpdater,
-          result);
+          result,
+          privateTransaction.getPayload());
     }
 
     return result.getOutput();
@@ -379,7 +380,8 @@ public class OnChainPrivacyPrecompiledContract extends AbstractPrecompiledContra
       final PrivacyGroupHeadBlockMap privacyGroupHeadBlockMap,
       final MutableWorldState disposablePrivateState,
       final WorldUpdater privateWorldStateUpdater,
-      final PrivateTransactionProcessor.Result result) {
+      final PrivateTransactionProcessor.Result result,
+      final Bytes payload) {
 
     LOG.trace(
         "Persisting private state {} for privacyGroup {}",
@@ -410,6 +412,14 @@ public class OnChainPrivacyPrecompiledContract extends AbstractPrecompiledContra
 
     if (!privacyGroupHeadBlockMap.contains(Bytes32.wrap(privacyGroupId), currentBlockHash)) {
       privacyGroupHeadBlockMap.put(Bytes32.wrap(privacyGroupId), currentBlockHash);
+      privateStateUpdater.putPrivacyGroupHeadBlockMap(
+          currentBlockHash, new PrivacyGroupHeadBlockMap(privacyGroupHeadBlockMap));
+    }
+
+    if (payload
+        .toHexString()
+        .startsWith(OnChainGroupManagement.REMOVE_PARTICIPANT_METHOD_SIGNATURE.toHexString())) {
+      privacyGroupHeadBlockMap.remove(Bytes32.wrap(privacyGroupId));
       privateStateUpdater.putPrivacyGroupHeadBlockMap(
           currentBlockHash, new PrivacyGroupHeadBlockMap(privacyGroupHeadBlockMap));
     }
