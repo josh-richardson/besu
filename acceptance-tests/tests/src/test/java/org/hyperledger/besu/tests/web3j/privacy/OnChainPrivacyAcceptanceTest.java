@@ -16,7 +16,6 @@ package org.hyperledger.besu.tests.web3j.privacy;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.hyperledger.besu.crypto.SecureRandomProvider;
 import org.hyperledger.besu.ethereum.core.Address;
 import org.hyperledger.besu.tests.acceptance.dsl.privacy.PrivacyAcceptanceTestBase;
 import org.hyperledger.besu.tests.acceptance.dsl.privacy.PrivacyNode;
@@ -24,7 +23,6 @@ import org.hyperledger.besu.tests.acceptance.dsl.transaction.privacy.PrivacyRequ
 import org.hyperledger.besu.tests.web3j.generated.EventEmitter;
 
 import java.math.BigInteger;
-import java.security.SecureRandom;
 import java.util.Collections;
 import java.util.Optional;
 
@@ -122,10 +120,18 @@ public class OnChainPrivacyAcceptanceTest extends PrivacyAcceptanceTestBase {
 
   @Test
   public void deployingMustGiveValidReceipt() {
-    final SecureRandom secureRandom = SecureRandomProvider.createSecureRandom();
-    final byte[] bytes = new byte[32];
-    secureRandom.nextBytes(bytes);
-    final Bytes privacyGroupId = Bytes.wrap(bytes);
+    final PrivxCreatePrivacyGroup privxCreatePrivacyGroup =
+        alice.execute(privacyTransactions.createOnChainPrivacyGroup(alice));
+
+    final PrivacyGroup expectedGroup =
+        new PrivacyGroup(
+            privxCreatePrivacyGroup.getPrivacyGroupId(),
+            PrivacyGroup.Type.PANTHEON,
+            "",
+            "",
+            Base64String.wrapList(alice.getEnclaveKey()));
+
+    alice.verify(privateTransactionVerifier.validOnChainPrivacyGroupExists(expectedGroup));
 
     final EventEmitter eventEmitter =
         alice.execute(
@@ -134,7 +140,7 @@ public class OnChainPrivacyAcceptanceTest extends PrivacyAcceptanceTestBase {
                 alice.getTransactionSigningKey(),
                 POW_CHAIN_ID,
                 alice.getEnclaveKey(),
-                privacyGroupId.toBase64String()));
+                privxCreatePrivacyGroup.getPrivacyGroupId()));
 
     privateContractVerifier
         .validPrivateContractDeployed(

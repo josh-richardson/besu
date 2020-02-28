@@ -111,6 +111,12 @@ public class PrivacyGroupTest extends AcceptanceTestBase {
   }
 
   @Test
+  public void ensureContractIsNotLockedAfterDeploy() throws Exception {
+    privacyGroup.unlock().send();
+    assertThat(privacyGroup.canExecute().send()).isTrue();
+  }
+
+  @Test
   public void canAddTwiceToContractWhenCallLock() throws Exception {
     privacyGroup
         .addParticipants(firstParticipant.raw(), Collections.singletonList(thirdParticipant.raw()))
