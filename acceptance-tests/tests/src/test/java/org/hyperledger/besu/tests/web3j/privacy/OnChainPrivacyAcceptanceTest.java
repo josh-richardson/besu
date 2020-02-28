@@ -270,7 +270,8 @@ public class OnChainPrivacyAcceptanceTest extends PrivacyAcceptanceTestBase {
 
     alice.getBesu().verify(ethConditions.miningStatus(false));
 
-    final BigInteger pendingTransactionFilterId = alice.execute(ethTransactions.newPendingTransactionsFilter());
+    final BigInteger pendingTransactionFilterId =
+        alice.execute(ethTransactions.newPendingTransactionsFilter());
 
     final String callHash =
         alice.execute(
@@ -285,8 +286,11 @@ public class OnChainPrivacyAcceptanceTest extends PrivacyAcceptanceTestBase {
     final String bobAddHash =
         bob.execute(privacyTransactions.addToPrivacyGroup(privacyGroupId, bob, charlie));
 
-
-    alice.getBesu().verify(ethConditions.expectNewPendingTransactions(pendingTransactionFilterId, Arrays.asList(callHash, bobAddHash)));
+    alice
+        .getBesu()
+        .verify(
+            ethConditions.expectNewPendingTransactions(
+                pendingTransactionFilterId, Arrays.asList(callHash, bobAddHash)));
 
     alice.execute(minerTransactions.minerStart());
 

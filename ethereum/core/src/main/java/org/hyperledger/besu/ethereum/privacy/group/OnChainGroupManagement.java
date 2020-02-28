@@ -29,4 +29,5 @@ public class OnChainGroupManagement {
   public static final Bytes CAN_EXECUTE_METHOD_SIGNATURE = Bytes.fromHexString("0x78b90337");
   public static final Bytes GET_PARTICIPANTS_METHOD_SIGNATURE = Bytes.fromHexString("0x0b0235be");
   public static final Bytes GET_VERSION_METHOD_SIGNATURE = Bytes.fromHexString("0x0d8e6e2c");
+  public static final Bytes REMOVE_PARTICIPANT_METHOD_SIGNATURE = Bytes.fromHexString("0x61544c91");
 }

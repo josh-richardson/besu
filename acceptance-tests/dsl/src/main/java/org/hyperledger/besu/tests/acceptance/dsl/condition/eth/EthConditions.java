@@ -72,7 +72,9 @@ public class EthConditions {
     return new MiningStatusCondition(transactions.mining(), isMining);
   }
 
-  public Condition expectNewPendingTransactions(final BigInteger filterId, final List<String> transactionHashes) {
-    return new NewPendingTransactionFilterChangesCondition(transactions.filterChanges(filterId), transactionHashes);
+  public Condition expectNewPendingTransactions(
+      final BigInteger filterId, final List<String> transactionHashes) {
+    return new NewPendingTransactionFilterChangesCondition(
+        transactions.filterChanges(filterId), transactionHashes);
   }
 }

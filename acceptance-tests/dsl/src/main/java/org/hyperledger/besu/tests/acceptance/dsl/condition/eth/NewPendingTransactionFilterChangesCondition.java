@@ -14,24 +14,24 @@
  */
 package org.hyperledger.besu.tests.acceptance.dsl.condition.eth;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.hyperledger.besu.tests.acceptance.dsl.WaitUtils;
 import org.hyperledger.besu.tests.acceptance.dsl.condition.Condition;
 import org.hyperledger.besu.tests.acceptance.dsl.node.Node;
 import org.hyperledger.besu.tests.acceptance.dsl.transaction.eth.EthFilterChangesTransaction;
-import org.hyperledger.besu.tests.acceptance.dsl.transaction.eth.EthGetTransactionReceiptWithRevertReason;
-import org.hyperledger.besu.tests.acceptance.dsl.transaction.net.CustomRequestFactory.TransactionReceiptWithRevertReason;
-import org.web3j.protocol.core.methods.response.EthLog;
 
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.web3j.protocol.core.methods.response.EthLog;
 
 public class NewPendingTransactionFilterChangesCondition implements Condition {
 
   private final EthFilterChangesTransaction filterChanges;
   private final List<String> transactionHashes;
 
-  public NewPendingTransactionFilterChangesCondition(final EthFilterChangesTransaction filterChanges, final List<String> transactionHashes) {
+  public NewPendingTransactionFilterChangesCondition(
+      final EthFilterChangesTransaction filterChanges, final List<String> transactionHashes) {
 
     this.filterChanges = filterChanges;
     this.transactionHashes = transactionHashes;
@@ -39,14 +39,14 @@ public class NewPendingTransactionFilterChangesCondition implements Condition {
 
   @Override
   public void verify(final Node node) {
-    WaitUtils.waitFor(() -> {
-      final EthLog response = node.execute(filterChanges);
-      assertThat(response).isNotNull();
-      assertThat(response.getResult().size()).isEqualTo(transactionHashes.size());
-      for (int i = 0; i < transactionHashes.size(); ++i) {
-        assertThat(response.getLogs().get(0).get()).isEqualTo(transactionHashes.get(0));
-      }
-    });
+    WaitUtils.waitFor(
+        () -> {
+          final EthLog response = node.execute(filterChanges);
+          assertThat(response).isNotNull();
+          assertThat(response.getResult().size()).isEqualTo(transactionHashes.size());
+          for (int i = 0; i < transactionHashes.size(); ++i) {
+            assertThat(response.getLogs().get(0).get()).isEqualTo(transactionHashes.get(0));
+          }
+        });
   }
-
 }

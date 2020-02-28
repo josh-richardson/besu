@@ -14,13 +14,12 @@
  */
 package org.hyperledger.besu.tests.acceptance.dsl.transaction.eth;
 
-import org.hyperledger.besu.ethereum.api.jsonrpc.internal.methods.EthNewPendingTransactionFilter;
 import org.hyperledger.besu.tests.acceptance.dsl.account.Account;
+
+import java.math.BigInteger;
 
 import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.DefaultBlockParameterName;
-
-import java.math.BigInteger;
 
 public class EthTransactions {
 
