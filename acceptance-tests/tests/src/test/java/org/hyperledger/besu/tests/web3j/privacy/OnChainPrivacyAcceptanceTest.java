@@ -45,8 +45,8 @@ public class OnChainPrivacyAcceptanceTest extends PrivacyAcceptanceTestBase {
   private PrivacyNode bob;
   private PrivacyNode charlie;
 
-  private MinerTransactions minerTransactions = new MinerTransactions();
-  private EthConditions ethConditions = new EthConditions(ethTransactions);
+  private final MinerTransactions minerTransactions = new MinerTransactions();
+  private final EthConditions ethConditions = new EthConditions(ethTransactions);
 
   @Before
   public void setUp() throws Exception {
