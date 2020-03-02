@@ -30,6 +30,7 @@ import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -38,7 +39,6 @@ import org.apache.tuweni.bytes.Bytes;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3jService;
 import org.web3j.protocol.besu.Besu;
-import org.web3j.protocol.besu.response.privacy.PrivFindPrivacyGroup;
 import org.web3j.protocol.besu.response.privacy.PrivateTransactionReceipt;
 import org.web3j.protocol.core.Request;
 import org.web3j.protocol.core.Response;
@@ -229,9 +229,13 @@ public class PrivacyRequestFactory {
     return new PrivxCreatePrivacyGroup(privacyGroupId.toBase64String(), transactionHash);
   }
 
-  public Request<?, PrivFindPrivacyGroup> privxFindPrivacyGroup(final List<Base64String> nodes) {
+  public Request<?, PrivxFindPrivacyGroupResponse> privxFindPrivacyGroup(
+      final List<Base64String> nodes) {
     return new Request<>(
-        "privx_findPrivacyGroup", singletonList(nodes), web3jService, PrivFindPrivacyGroup.class);
+        "privx_findPrivacyGroup",
+        singletonList(nodes),
+        web3jService,
+        PrivxFindPrivacyGroupResponse.class);
   }
 
   public Request<?, GetPrivacyPrecompileAddressResponse> privGetPrivacyPrecompileAddress() {
@@ -309,6 +313,91 @@ public class PrivacyRequestFactory {
         GetTransactionCountResponse.class);
   }
 
+  public Request<?, GetCodeResponse> privGetCode(
+      final String privacyGroupId, final String contractAddress, final String blockParameter) {
+    return new Request<>(
+        "priv_getCode",
+        List.of(privacyGroupId, contractAddress, blockParameter),
+        web3jService,
+        GetCodeResponse.class);
+  }
+
+  public static class PrivxFindPrivacyGroupResponse extends Response<List<OnChainPrivacyGroup>> {
+    public List<OnChainPrivacyGroup> getGroups() {
+      return getResult();
+    }
+  }
+
+  public static class OnChainPrivacyGroup {
+    private final Base64String privacyGroupId;
+    private final String name;
+    private final String description;
+    private final Type type;
+    private final List<Base64String> members;
+
+    public enum Type {
+      LEGACY,
+      PANTHEON,
+      ONCHAIN
+    }
+
+    @JsonCreator
+    public OnChainPrivacyGroup(
+        @JsonProperty(value = "privacyGroupId") final String privacyGroupId,
+        @JsonProperty(value = "type") final Type type,
+        @JsonProperty(value = "name") final String name,
+        @JsonProperty(value = "description") final String description,
+        @JsonProperty(value = "members") final List<Base64String> members) {
+      this.privacyGroupId = Base64String.wrap(privacyGroupId);
+      this.type = type;
+      this.name = name;
+      this.description = description;
+      this.members = members;
+    }
+
+    public Base64String getPrivacyGroupId() {
+      return privacyGroupId;
+    }
+
+    public String getName() {
+      return name;
+    }
+
+    public String getDescription() {
+      return description;
+    }
+
+    public Type getType() {
+      return type;
+    }
+
+    public List<Base64String> getMembers() {
+      return members;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+      if (this == o) {
+        return true;
+      }
+      if (o == null || getClass() != o.getClass()) {
+        return false;
+      }
+      final OnChainPrivacyGroup that = (OnChainPrivacyGroup) o;
+      return getPrivacyGroupId().equals(that.getPrivacyGroupId())
+          && getName().equals(that.getName())
+          && getDescription().equals(that.getDescription())
+          && getType() == that.getType()
+          && getMembers().equals(that.getMembers());
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(
+          getPrivacyGroupId(), getName(), getDescription(), getType(), getMembers());
+    }
+  }
+
   public static class PrivxCreatePrivacyGroup {
     final String privacyGroupId;
     final String transactionHash;
@@ -355,14 +444,5 @@ public class PrivacyRequestFactory {
       longBytes[i] = (byte) ((l >> ((7 - i) * 8)) & 0xFF);
     }
     return Bytes.concatenate(Bytes.wrap(new byte[24]), Bytes.wrap(longBytes));
-  }
-
-  public Request<?, GetCodeResponse> privGetCode(
-      final String privacyGroupId, final String contractAddress, final String blockParameter) {
-    return new Request<>(
-        "priv_getCode",
-        List.of(privacyGroupId, contractAddress, blockParameter),
-        web3jService,
-        GetCodeResponse.class);
   }
 }

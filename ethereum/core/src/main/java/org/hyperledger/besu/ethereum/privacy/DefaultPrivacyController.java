@@ -263,8 +263,7 @@ public class DefaultPrivacyController implements PrivacyController {
               final List<String> participants = getExistingParticipants(c, enclavePublicKey);
               if (participants.containsAll(addresses)) {
                 privacyGroups.add(
-                    new PrivacyGroup(
-                        c.toBase64String(), PrivacyGroup.Type.PANTHEON, "", "", participants));
+                    new PrivacyGroup(c.toBase64String(), Type.ONCHAIN, "", "", participants));
               }
             });
     return privacyGroups;

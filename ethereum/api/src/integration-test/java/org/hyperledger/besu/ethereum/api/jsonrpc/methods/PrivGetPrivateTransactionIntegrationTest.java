@@ -94,7 +94,8 @@ public class PrivGetPrivateTransactionIntegrationTest {
     enclave = factory.createVertxEnclave(testHarness.clientUrl());
 
     privacyController =
-        new DefaultPrivacyController(null, privateStateStorage, enclave, null, null, null, null, null);
+        new DefaultPrivacyController(
+            null, privateStateStorage, enclave, null, null, null, null, null);
   }
 
   @AfterClass

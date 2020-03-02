@@ -16,15 +16,16 @@ package org.hyperledger.besu.tests.acceptance.dsl.privacy.transaction;
 
 import org.hyperledger.besu.tests.acceptance.dsl.transaction.NodeRequests;
 import org.hyperledger.besu.tests.acceptance.dsl.transaction.Transaction;
+import org.hyperledger.besu.tests.acceptance.dsl.transaction.privacy.PrivacyRequestFactory;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.web3j.protocol.besu.response.privacy.PrivacyGroup;
 import org.web3j.utils.Base64String;
 
-public class FindOnChainPrivacyGroupTransaction implements Transaction<List<PrivacyGroup>> {
+public class FindOnChainPrivacyGroupTransaction
+    implements Transaction<List<PrivacyRequestFactory.OnChainPrivacyGroup>> {
   private final List<Base64String> nodes;
 
   public FindOnChainPrivacyGroupTransaction(final List<String> nodeEnclaveKeys) {
@@ -32,7 +33,7 @@ public class FindOnChainPrivacyGroupTransaction implements Transaction<List<Priv
   }
 
   @Override
-  public List<PrivacyGroup> execute(final NodeRequests node) {
+  public List<PrivacyRequestFactory.OnChainPrivacyGroup> execute(final NodeRequests node) {
     try {
       return node.privacy().privxFindPrivacyGroup(nodes).send().getGroups();
     } catch (IOException e) {

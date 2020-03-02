@@ -21,6 +21,7 @@ import org.hyperledger.besu.tests.acceptance.dsl.condition.eth.EthConditions;
 import org.hyperledger.besu.tests.acceptance.dsl.privacy.PrivacyAcceptanceTestBase;
 import org.hyperledger.besu.tests.acceptance.dsl.privacy.PrivacyNode;
 import org.hyperledger.besu.tests.acceptance.dsl.transaction.miner.MinerTransactions;
+import org.hyperledger.besu.tests.acceptance.dsl.transaction.privacy.PrivacyRequestFactory.OnChainPrivacyGroup;
 import org.hyperledger.besu.tests.acceptance.dsl.transaction.privacy.PrivacyRequestFactory.PrivxCreatePrivacyGroup;
 import org.hyperledger.besu.tests.web3j.generated.EventEmitter;
 
@@ -32,7 +33,6 @@ import java.util.Optional;
 import org.apache.tuweni.bytes.Bytes;
 import org.junit.Before;
 import org.junit.Test;
-import org.web3j.protocol.besu.response.privacy.PrivacyGroup;
 import org.web3j.protocol.besu.response.privacy.PrivateTransactionReceipt;
 import org.web3j.protocol.core.methods.response.Log;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
@@ -69,10 +69,10 @@ public class OnChainPrivacyAcceptanceTest extends PrivacyAcceptanceTestBase {
 
     assertThat(privxCreatePrivacyGroup).isNotNull();
 
-    final PrivacyGroup expectedGroup =
-        new PrivacyGroup(
+    final OnChainPrivacyGroup expectedGroup =
+        new OnChainPrivacyGroup(
             privxCreatePrivacyGroup.getPrivacyGroupId(),
-            PrivacyGroup.Type.PANTHEON,
+            OnChainPrivacyGroup.Type.ONCHAIN,
             "",
             "",
             Base64String.wrapList(alice.getEnclaveKey(), bob.getEnclaveKey()));
@@ -128,10 +128,10 @@ public class OnChainPrivacyAcceptanceTest extends PrivacyAcceptanceTestBase {
     final PrivxCreatePrivacyGroup privxCreatePrivacyGroup =
         alice.execute(privacyTransactions.createOnChainPrivacyGroup(alice));
 
-    final PrivacyGroup expectedGroup =
-        new PrivacyGroup(
+    final OnChainPrivacyGroup expectedGroup =
+        new OnChainPrivacyGroup(
             privxCreatePrivacyGroup.getPrivacyGroupId(),
-            PrivacyGroup.Type.PANTHEON,
+            OnChainPrivacyGroup.Type.ONCHAIN,
             "",
             "",
             Base64String.wrapList(alice.getEnclaveKey()));
@@ -160,10 +160,10 @@ public class OnChainPrivacyAcceptanceTest extends PrivacyAcceptanceTestBase {
 
     assertThat(privxCreatePrivacyGroup).isNotNull();
 
-    final PrivacyGroup expectedGroup =
-        new PrivacyGroup(
+    final OnChainPrivacyGroup expectedGroup =
+        new OnChainPrivacyGroup(
             privxCreatePrivacyGroup.getPrivacyGroupId(),
-            PrivacyGroup.Type.PANTHEON,
+            OnChainPrivacyGroup.Type.ONCHAIN,
             "",
             "",
             Base64String.wrapList(alice.getEnclaveKey(), bob.getEnclaveKey()));
@@ -193,10 +193,10 @@ public class OnChainPrivacyAcceptanceTest extends PrivacyAcceptanceTestBase {
         privacyTransactions.addToPrivacyGroup(
             privxCreatePrivacyGroup.getPrivacyGroupId(), alice, charlie));
 
-    final PrivacyGroup expectedGroupAfterCharlieIsAdded =
-        new PrivacyGroup(
+    final OnChainPrivacyGroup expectedGroupAfterCharlieIsAdded =
+        new OnChainPrivacyGroup(
             privxCreatePrivacyGroup.getPrivacyGroupId(),
-            PrivacyGroup.Type.PANTHEON,
+            OnChainPrivacyGroup.Type.ONCHAIN,
             "",
             "",
             Base64String.wrapList(
@@ -223,10 +223,10 @@ public class OnChainPrivacyAcceptanceTest extends PrivacyAcceptanceTestBase {
     assertThat(privxCreatePrivacyGroup).isNotNull();
 
     final String privacyGroupId = privxCreatePrivacyGroup.getPrivacyGroupId();
-    final PrivacyGroup expectedGroup =
-        new PrivacyGroup(
+    final OnChainPrivacyGroup expectedGroup =
+        new OnChainPrivacyGroup(
             privacyGroupId,
-            PrivacyGroup.Type.PANTHEON,
+            OnChainPrivacyGroup.Type.ONCHAIN,
             "",
             "",
             Base64String.wrapList(alice.getEnclaveKey()));
@@ -251,10 +251,10 @@ public class OnChainPrivacyAcceptanceTest extends PrivacyAcceptanceTestBase {
 
     alice.execute(privacyTransactions.addToPrivacyGroup(privacyGroupId, alice, bob));
 
-    final PrivacyGroup expectedGroupAfterBobIsAdded =
-        new PrivacyGroup(
+    final OnChainPrivacyGroup expectedGroupAfterBobIsAdded =
+        new OnChainPrivacyGroup(
             privacyGroupId,
-            PrivacyGroup.Type.PANTHEON,
+            OnChainPrivacyGroup.Type.ONCHAIN,
             "",
             "",
             Base64String.wrapList(alice.getEnclaveKey(), bob.getEnclaveKey()));
@@ -297,10 +297,10 @@ public class OnChainPrivacyAcceptanceTest extends PrivacyAcceptanceTestBase {
 
     alice.getBesu().verify(ethConditions.miningStatus(true));
 
-    final PrivacyGroup expectedGroupAfterCharlieIsAdded =
-        new PrivacyGroup(
+    final OnChainPrivacyGroup expectedGroupAfterCharlieIsAdded =
+        new OnChainPrivacyGroup(
             privacyGroupId,
-            PrivacyGroup.Type.PANTHEON,
+            OnChainPrivacyGroup.Type.ONCHAIN,
             "",
             "",
             Base64String.wrapList(

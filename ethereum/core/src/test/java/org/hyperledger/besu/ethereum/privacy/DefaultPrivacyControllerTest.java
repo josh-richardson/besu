@@ -221,7 +221,7 @@ public class DefaultPrivacyControllerTest {
     final List<String> privacyGroupAddresses = newArrayList(ENCLAVE_PUBLIC_KEY, ENCLAVE_KEY2);
 
     final PrivacyGroup privacyGroup =
-        new PrivacyGroup(PRIVACY_GROUP_ID, Type.PANTHEON, "", "", privacyGroupAddresses);
+        new PrivacyGroup(PRIVACY_GROUP_ID, Type.ONCHAIN, "", "", privacyGroupAddresses);
 
     final PrivacyGroupHeadBlockMap privacyGroupHeadBlockMap =
         new PrivacyGroupHeadBlockMap(

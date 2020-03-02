@@ -18,20 +18,21 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.hyperledger.besu.tests.acceptance.dsl.privacy.PrivacyNode;
 import org.hyperledger.besu.tests.acceptance.dsl.privacy.transaction.PrivacyTransactions;
+import org.hyperledger.besu.tests.acceptance.dsl.transaction.privacy.PrivacyRequestFactory;
 
 import java.util.List;
 
 import org.awaitility.Awaitility;
-import org.web3j.protocol.besu.response.privacy.PrivacyGroup;
 import org.web3j.utils.Base64String;
 
 public class ExpectValidOnChainPrivacyGroupCreated implements PrivateCondition {
 
   private final PrivacyTransactions transactions;
-  private final PrivacyGroup expected;
+  private final PrivacyRequestFactory.OnChainPrivacyGroup expected;
 
   public ExpectValidOnChainPrivacyGroupCreated(
-      final PrivacyTransactions transactions, final PrivacyGroup expected) {
+      final PrivacyTransactions transactions,
+      final PrivacyRequestFactory.OnChainPrivacyGroup expected) {
     this.transactions = transactions;
     this.expected = expected;
   }
@@ -41,7 +42,7 @@ public class ExpectValidOnChainPrivacyGroupCreated implements PrivateCondition {
     Awaitility.await()
         .untilAsserted(
             () -> {
-              final List<PrivacyGroup> groups =
+              final List<PrivacyRequestFactory.OnChainPrivacyGroup> groups =
                   node.execute(
                       transactions.findOnChainPrivacyGroup(
                           Base64String.unwrapList(expected.getMembers())));
