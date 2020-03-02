@@ -84,6 +84,8 @@ public class DefaultPrivacyControllerTest {
   private static final String ENCLAVE_KEY2 = "Ko2bVqD+nNlNYL5EE7y3IdOnviftjiizpjRt+HTuFBs=";
   private static final String PRIVACY_GROUP_ID = "DyAOiF/ynpc+JXa2YAGB0bCitSlOMNm+ShmB/7M6C4w=";
   private static final ArrayList<Log> LOGS = new ArrayList<>();
+  private static final String MOCK_TRANSACTION_SIMULATOR_RESULT_OUTPUT_BYTES_PREFIX =
+      "0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000002";
 
   private PrivacyController privacyController;
   private PrivacyController brokenPrivacyController;
@@ -228,6 +230,7 @@ public class DefaultPrivacyControllerTest {
             Map.of(Bytes32.wrap(Bytes.fromBase64String(PRIVACY_GROUP_ID)), Hash.ZERO));
     when(privateStateStorage.getPrivacyGroupHeadBlockMap(any()))
         .thenReturn(Optional.of(privacyGroupHeadBlockMap));
+
     when(privateTransactionSimulator.process(any(), any()))
         .thenReturn(
             Optional.of(
@@ -236,8 +239,7 @@ public class DefaultPrivacyControllerTest {
                     emptyList(),
                     0,
                     Bytes.fromHexString(
-                        "0x0000000000000000000000000000000000000000000000000000000000000020"
-                            + "0000000000000000000000000000000000000000000000000000000000000002"
+                        MOCK_TRANSACTION_SIMULATOR_RESULT_OUTPUT_BYTES_PREFIX
                             + Bytes.fromBase64String(ENCLAVE_PUBLIC_KEY).toUnprefixedHexString()
                             + Bytes.fromBase64String(ENCLAVE_KEY2).toUnprefixedHexString()),
                     ValidationResult.valid(),

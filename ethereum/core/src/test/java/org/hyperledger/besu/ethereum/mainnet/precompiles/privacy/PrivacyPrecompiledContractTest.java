@@ -63,6 +63,7 @@ public class PrivacyPrecompiledContractTest {
   private MessageFrame messageFrame;
   private Blockchain blockchain;
   private final String DEFAULT_OUTPUT = "0x01";
+  final String PAYLOAD_TEST_PRIVACY_GROUP_ID = "8lDVI66RZHIrBsolz6Kn88Rd+WsJ4hUjb4hsh29xW/o=";
   private final WorldStateArchive worldStateArchive = mock(WorldStateArchive.class);
   final PrivateStateStorage privateStateStorage = mock(PrivateStateStorage.class);
 
@@ -130,14 +131,16 @@ public class PrivacyPrecompiledContractTest {
         new PrivacyPrecompiledContract(
             new SpuriousDragonGasCalculator(), enclave, worldStateArchive, privateStateStorage);
     contract.setPrivateTransactionProcessor(mockPrivateTxProcessor());
-    final String privacyGroupId = "8lDVI66RZHIrBsolz6Kn88Rd+WsJ4hUjb4hsh29xW/o=";
 
     BytesValueRLPOutput bytesValueRLPOutput = new BytesValueRLPOutput();
-    PrivateTransactionDataFixture.privateTransaction(privacyGroupId).writeTo(bytesValueRLPOutput);
+    PrivateTransactionDataFixture.privateTransaction(PAYLOAD_TEST_PRIVACY_GROUP_ID)
+        .writeTo(bytesValueRLPOutput);
 
     final ReceiveResponse response =
         new ReceiveResponse(
-            bytesValueRLPOutput.encoded().toBase64String().getBytes(UTF_8), privacyGroupId, null);
+            bytesValueRLPOutput.encoded().toBase64String().getBytes(UTF_8),
+            PAYLOAD_TEST_PRIVACY_GROUP_ID,
+            null);
     when(enclave.receive(any(String.class))).thenReturn(response);
 
     final Bytes actual = contract.compute(key, messageFrame);

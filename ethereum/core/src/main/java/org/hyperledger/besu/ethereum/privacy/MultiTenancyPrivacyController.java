@@ -152,8 +152,10 @@ public class MultiTenancyPrivacyController implements PrivacyController {
   }
 
   @Override
-  public PrivacyGroup retrievePrivacyGroup(final String privacyGroupId, final String enclaveKey) {
-    return privacyController.retrievePrivacyGroup(privacyGroupId, enclaveKey);
+  public PrivacyGroup retrievePrivacyGroup(
+      final String privacyGroupId, final String enclavePublicKey) {
+    verifyPrivacyGroupContainsEnclavePublicKey(privacyGroupId, enclavePublicKey);
+    return privacyController.retrievePrivacyGroup(privacyGroupId, enclavePublicKey);
   }
 
   @Override

@@ -271,7 +271,8 @@ public class OnChainPrivacyPrecompiledContract extends AbstractPrecompiledContra
             privacyGroupId,
             blockchain,
             disposablePrivateState,
-            privateWorldStateUpdater);
+            privateWorldStateUpdater,
+            OnChainGroupManagement.CAN_EXECUTE_METHOD_SIGNATURE);
     return result.getOutput().toHexString().endsWith("0");
   }
 
@@ -282,7 +283,8 @@ public class OnChainPrivacyPrecompiledContract extends AbstractPrecompiledContra
       final Bytes32 privacyGroupId,
       final Blockchain currentBlockchain,
       final MutableWorldState disposablePrivateState,
-      final WorldUpdater privateWorldStateUpdater) {
+      final WorldUpdater privateWorldStateUpdater,
+      final Bytes canExecuteMethodSignature) {
     // We need the "lock status" of the group for every single transaction but we don't want this
     // call to affect the state
     // privateTransactionProcessor.processTransaction(...) commits the state if the process was
@@ -297,9 +299,7 @@ public class OnChainPrivacyPrecompiledContract extends AbstractPrecompiledContra
         canExecuteUpdater,
         currentBlockHeader,
         buildSimulationTransaction(
-            privacyGroupId,
-            privateWorldStateUpdater,
-            OnChainGroupManagement.CAN_EXECUTE_METHOD_SIGNATURE),
+            privacyGroupId, privateWorldStateUpdater, canExecuteMethodSignature),
         messageFrame.getMiningBeneficiary(),
         new DebugOperationTracer(TraceOptions.DEFAULT),
         messageFrame.getBlockHashLookup(),
@@ -354,7 +354,8 @@ public class OnChainPrivacyPrecompiledContract extends AbstractPrecompiledContra
             privacyGroupId,
             currentBlockchain,
             disposablePrivateState,
-            privateWorldStateUpdater);
+            privateWorldStateUpdater,
+            OnChainGroupManagement.GET_VERSION_METHOD_SIGNATURE);
 
     if (version.equals(getVersionResult.getOutput())) {
       return true;
