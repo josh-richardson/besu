@@ -43,7 +43,7 @@ public class PrivacyTransactions {
     return new AddToOnChainPrivacyGroupTransaction(privacyGroupId, adder, nodes);
   }
 
-  public LockOnChainPrivacyGroupTransaction privxLockContract(
+  public LockOnChainPrivacyGroupTransaction privxLockPrivacyGroup(
       final String privacyGroupId, final PrivacyNode locker) {
     return new LockOnChainPrivacyGroupTransaction(privacyGroupId, locker);
   }

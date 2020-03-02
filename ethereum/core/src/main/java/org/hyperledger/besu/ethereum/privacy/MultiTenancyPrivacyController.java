@@ -24,6 +24,7 @@ import org.hyperledger.besu.ethereum.mainnet.TransactionValidator.TransactionInv
 import org.hyperledger.besu.ethereum.mainnet.ValidationResult;
 import org.hyperledger.besu.ethereum.transaction.CallParameter;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -83,7 +84,11 @@ public class MultiTenancyPrivacyController implements PrivacyController {
       throw new MultiTenancyValidationException(
           "Privacy group addresses must contain the enclave public key");
     }
-    return privacyController.findPrivacyGroup(addresses, enclavePublicKey);
+    PrivacyGroup[] resultantGroups =
+        privacyController.findPrivacyGroup(addresses, enclavePublicKey);
+    return Arrays.stream(resultantGroups)
+        .filter(g -> g.getMembers().contains(enclavePublicKey))
+        .toArray(PrivacyGroup[]::new);
   }
 
   @Override

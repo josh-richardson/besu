@@ -154,7 +154,7 @@ public class PrivacyRequestFactory {
         .getTransactionHash();
   }
 
-  public String privxLockContract(final PrivacyNode locker, final Base64String privacyGroupId)
+  public String privxLockPrivacyGroup(final PrivacyNode locker, final Base64String privacyGroupId)
       throws IOException, TransactionException {
     final BigInteger nonce =
         besuClient

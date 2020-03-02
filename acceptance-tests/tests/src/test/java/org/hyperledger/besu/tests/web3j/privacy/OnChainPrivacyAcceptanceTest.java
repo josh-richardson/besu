@@ -48,6 +48,11 @@ public class OnChainPrivacyAcceptanceTest extends PrivacyAcceptanceTestBase {
   private final MinerTransactions minerTransactions = new MinerTransactions();
   private final EthConditions ethConditions = new EthConditions(ethTransactions);
 
+  private static final String EXPECTED_STORE_OUTPUT_DATA =
+      "0x000000000000000000000000f17f52151ebef6c7334fad080c5704d77216b7320000000000000000000000000000000000000000000000000000000000000539";
+  private static final String EXPECTED_STORE_EVENT_TOPIC =
+      "0xc9db20adedc6cf2b5d25252b101ab03e124902a73fcb12b753f3d1aaa2d8f9f5";
+
   @Before
   public void setUp() throws Exception {
     alice =
@@ -187,7 +192,8 @@ public class OnChainPrivacyAcceptanceTest extends PrivacyAcceptanceTestBase {
         .verify(eventEmitter);
 
     alice.execute(
-        privacyTransactions.privxLockContract(privxCreatePrivacyGroup.getPrivacyGroupId(), alice));
+        privacyTransactions.privxLockPrivacyGroup(
+            privxCreatePrivacyGroup.getPrivacyGroupId(), alice));
 
     alice.execute(
         privacyTransactions.addToPrivacyGroup(
@@ -265,7 +271,7 @@ public class OnChainPrivacyAcceptanceTest extends PrivacyAcceptanceTestBase {
     bob.verify(
         privateTransactionVerifier.validOnChainPrivacyGroupExists(expectedGroupAfterBobIsAdded));
 
-    bob.execute(privacyTransactions.privxLockContract(privacyGroupId, bob));
+    bob.execute(privacyTransactions.privxLockPrivacyGroup(privacyGroupId, bob));
 
     alice.execute(minerTransactions.minerStop());
 
@@ -395,10 +401,9 @@ public class OnChainPrivacyAcceptanceTest extends PrivacyAcceptanceTestBase {
                     null,
                     null,
                     eventEmitter.getContractAddress(),
-                    "0x000000000000000000000000f17f52151ebef6c7334fad080c5704d77216b7320000000000000000000000000000000000000000000000000000000000000539",
+                    EXPECTED_STORE_OUTPUT_DATA,
                     null,
-                    Collections.singletonList(
-                        "0xc9db20adedc6cf2b5d25252b101ab03e124902a73fcb12b753f3d1aaa2d8f9f5"))),
+                    Collections.singletonList(EXPECTED_STORE_EVENT_TOPIC))),
             null,
             null,
             charlie.getEnclaveKey(),

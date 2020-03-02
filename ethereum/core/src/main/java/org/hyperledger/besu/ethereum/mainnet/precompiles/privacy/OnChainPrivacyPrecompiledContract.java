@@ -184,7 +184,7 @@ public class OnChainPrivacyPrecompiledContract extends AbstractPrecompiledContra
             .toHexString()
             .startsWith(OnChainGroupManagement.ADD_TO_GROUP_METHOD_SIGNATURE.toHexString());
 
-    final boolean isContractLocked =
+    final boolean isPrivacyGroupLocked =
         isContractLocked(
             messageFrame,
             currentBlockHeader,
@@ -192,10 +192,9 @@ public class OnChainPrivacyPrecompiledContract extends AbstractPrecompiledContra
             privacyGroupId,
             blockchain,
             disposablePrivateState,
-            privateWorldStateUpdater,
-            OnChainGroupManagement.CAN_EXECUTE_METHOD_SIGNATURE);
+            privateWorldStateUpdater);
 
-    if (isAddingParticipant && !isContractLocked) {
+    if (isAddingParticipant && !isPrivacyGroupLocked) {
       LOG.debug(
           "Privacy Group {} is not locked while trying to add to group with commitment {}",
           privacyGroupId.toHexString(),
@@ -203,7 +202,7 @@ public class OnChainPrivacyPrecompiledContract extends AbstractPrecompiledContra
       return Bytes.EMPTY;
     }
 
-    if (!isAddingParticipant && isContractLocked) {
+    if (!isAddingParticipant && isPrivacyGroupLocked) {
       LOG.debug(
           "Privacy Group {} is locked while trying to execute transaction with commitment {}",
           privacyGroupId.toHexString(),
@@ -211,7 +210,7 @@ public class OnChainPrivacyPrecompiledContract extends AbstractPrecompiledContra
       return Bytes.EMPTY;
     }
 
-    if (!onChainVersionMatches(
+    if (!onChainPrivacyGroupVersionMatches(
         messageFrame,
         currentBlockHeader,
         version,
@@ -263,8 +262,7 @@ public class OnChainPrivacyPrecompiledContract extends AbstractPrecompiledContra
       final Bytes32 privacyGroupId,
       final Blockchain blockchain,
       final MutableWorldState disposablePrivateState,
-      final WorldUpdater privateWorldStateUpdater,
-      final Bytes canExecuteMethodSignature) {
+      final WorldUpdater privateWorldStateUpdater) {
     final PrivateTransactionProcessor.Result result =
         checkCanExecute(
             messageFrame,
@@ -273,8 +271,7 @@ public class OnChainPrivacyPrecompiledContract extends AbstractPrecompiledContra
             privacyGroupId,
             blockchain,
             disposablePrivateState,
-            privateWorldStateUpdater,
-            canExecuteMethodSignature);
+            privateWorldStateUpdater);
     return result.getOutput().toHexString().endsWith("0");
   }
 
@@ -285,8 +282,7 @@ public class OnChainPrivacyPrecompiledContract extends AbstractPrecompiledContra
       final Bytes32 privacyGroupId,
       final Blockchain currentBlockchain,
       final MutableWorldState disposablePrivateState,
-      final WorldUpdater privateWorldStateUpdater,
-      final Bytes canExecuteMethodSignature) {
+      final WorldUpdater privateWorldStateUpdater) {
     // We need the "lock status" of the group for every single transaction but we don't want this
     // call to affect the state
     // privateTransactionProcessor.processTransaction(...) commits the state if the process was
@@ -301,7 +297,9 @@ public class OnChainPrivacyPrecompiledContract extends AbstractPrecompiledContra
         canExecuteUpdater,
         currentBlockHeader,
         buildSimulationTransaction(
-            privacyGroupId, privateWorldStateUpdater, canExecuteMethodSignature),
+            privacyGroupId,
+            privateWorldStateUpdater,
+            OnChainGroupManagement.CAN_EXECUTE_METHOD_SIGNATURE),
         messageFrame.getMiningBeneficiary(),
         new DebugOperationTracer(TraceOptions.DEFAULT),
         messageFrame.getBlockHashLookup(),
@@ -335,7 +333,7 @@ public class OnChainPrivacyPrecompiledContract extends AbstractPrecompiledContra
     }
   }
 
-  protected boolean onChainVersionMatches(
+  protected boolean onChainPrivacyGroupVersionMatches(
       final MessageFrame messageFrame,
       final ProcessableBlockHeader currentBlockHeader,
       final Bytes32 version,
@@ -356,8 +354,7 @@ public class OnChainPrivacyPrecompiledContract extends AbstractPrecompiledContra
             privacyGroupId,
             currentBlockchain,
             disposablePrivateState,
-            privateWorldStateUpdater,
-            OnChainGroupManagement.GET_VERSION_METHOD_SIGNATURE);
+            privateWorldStateUpdater);
 
     if (version.equals(getVersionResult.getOutput())) {
       return true;
