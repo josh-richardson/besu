@@ -470,25 +470,6 @@ public class DefaultPrivacyController implements PrivacyController {
     }
 
     privateTransaction.writeTo(rlpOutput);
-
-    privateTransaction
-        .getPrivacyGroupId()
-        .ifPresent(
-            privacyGroupId -> {
-              final Optional<PrivateTransactionProcessor.Result> process =
-                  privateTransactionSimulator.process(
-                      privateTransaction.getPrivacyGroupId().get().toBase64String(),
-                      buildCallParams(
-                          Bytes.fromBase64String(enclavePublicKey), GET_VERSION_METHOD_SIGNATURE));
-              process.ifPresent(
-                  result -> {
-                    if (!result.getOutput().toHexString().equals("0x")) {
-                      rlpOutput.writeBytes(result.getOutput());
-                    }
-                  });
-            });
-
-    rlpOutput.endList();
     final String payload = rlpOutput.encoded().toBase64String();
 
     return enclave.send(payload, privateTransaction.getPrivateFrom().toBase64String(), privateFor);

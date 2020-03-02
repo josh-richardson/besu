@@ -253,7 +253,7 @@ public class OnChainPrivacyAcceptanceTest extends PrivacyAcceptanceTestBase {
         .verify(eventEmitter);
 
     final String aliceLockHash =
-        alice.execute(privacyTransactions.privxLockContract(privacyGroupId, alice));
+        alice.execute(privacyTransactions.privxLockPrivacyGroup(privacyGroupId, alice));
 
     alice.execute(privacyTransactions.addToPrivacyGroup(privacyGroupId, alice, bob));
 
