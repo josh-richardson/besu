@@ -389,6 +389,7 @@ public class DefaultPrivacyController implements PrivacyController {
     return privateTransactions;
   }
 
+  @Override
   public List<PrivateTransactionWithMetadata> retrieveAddBlob(final String addDataKey) {
     final ReceiveResponse addReceiveResponse = enclave.receive(addDataKey);
     return deserializeAddToGroupPayload(

@@ -158,6 +158,11 @@ public class MultiTenancyPrivacyController implements PrivacyController {
   }
 
   @Override
+  public List<PrivateTransactionWithMetadata> retrieveAddBlob(final String addDataKey) {
+    return privacyController.retrieveAddBlob(addDataKey);
+  }
+
+  @Override
   public Optional<Bytes> getContractCode(
       final String privacyGroupId,
       final Address contractAddress,

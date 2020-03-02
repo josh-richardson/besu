@@ -74,4 +74,6 @@ public interface PrivacyController {
       final Address contractAddress,
       final Hash blockHash,
       final String enclavePublicKey);
+
+  List<PrivateTransactionWithMetadata> retrieveAddBlob(String addDataKey);
 }

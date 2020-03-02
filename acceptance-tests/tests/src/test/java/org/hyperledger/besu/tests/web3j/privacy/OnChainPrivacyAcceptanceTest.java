@@ -246,7 +246,8 @@ public class OnChainPrivacyAcceptanceTest extends PrivacyAcceptanceTestBase {
             eventEmitter.getContractAddress(), alice.getAddress().toString())
         .verify(eventEmitter);
 
-    alice.execute(privacyTransactions.privxLockContract(privacyGroupId, alice));
+    final String aliceLockHash =
+        alice.execute(privacyTransactions.privxLockContract(privacyGroupId, alice));
 
     alice.execute(privacyTransactions.addToPrivacyGroup(privacyGroupId, alice, bob));
 
@@ -350,7 +351,26 @@ public class OnChainPrivacyAcceptanceTest extends PrivacyAcceptanceTestBase {
             "0x0"); // this means the "call" failed which is what we expect because the group was
     // locked!
 
-    final String storeHash =
+    // assert charlie can access private transaction information from before he was added
+    final PrivateTransactionReceipt expectedAliceLockReceipt =
+        new PrivateTransactionReceipt(
+            null,
+            alice.getAddress().toHexString(),
+            Address.PRIVACY_PROXY.toHexString(),
+            "0x",
+            Collections.emptyList(),
+            null,
+            null,
+            alice.getEnclaveKey(),
+            null,
+            privxCreatePrivacyGroup.getPrivacyGroupId(),
+            "0x1",
+            null);
+    charlie.verify(
+        privateTransactionVerifier.validPrivateTransactionReceipt(
+            aliceLockHash, expectedAliceLockReceipt));
+
+    final String aliceStoreHash =
         charlie.execute(
             privateContractTransactions.callOnChainPermissioningSmartContract(
                 eventEmitter.getContractAddress(),
@@ -360,7 +380,7 @@ public class OnChainPrivacyAcceptanceTest extends PrivacyAcceptanceTestBase {
                 charlie.getEnclaveKey(),
                 privacyGroupId));
 
-    final PrivateTransactionReceipt expectedReceipt =
+    final PrivateTransactionReceipt expectedStoreReceipt =
         new PrivateTransactionReceipt(
             null,
             charlie.getAddress().toHexString(),
@@ -371,7 +391,7 @@ public class OnChainPrivacyAcceptanceTest extends PrivacyAcceptanceTestBase {
                     false,
                     "0x0",
                     "0x0",
-                    storeHash,
+                    aliceStoreHash,
                     null,
                     null,
                     eventEmitter.getContractAddress(),
@@ -388,12 +408,15 @@ public class OnChainPrivacyAcceptanceTest extends PrivacyAcceptanceTestBase {
             null);
 
     alice.verify(
-        privateTransactionVerifier.validPrivateTransactionReceipt(storeHash, expectedReceipt));
+        privateTransactionVerifier.validPrivateTransactionReceipt(
+            aliceStoreHash, expectedStoreReceipt));
 
     bob.verify(
-        privateTransactionVerifier.validPrivateTransactionReceipt(storeHash, expectedReceipt));
+        privateTransactionVerifier.validPrivateTransactionReceipt(
+            aliceStoreHash, expectedStoreReceipt));
 
     charlie.verify(
-        privateTransactionVerifier.validPrivateTransactionReceipt(storeHash, expectedReceipt));
+        privateTransactionVerifier.validPrivateTransactionReceipt(
+            aliceStoreHash, expectedStoreReceipt));
   }
 }
